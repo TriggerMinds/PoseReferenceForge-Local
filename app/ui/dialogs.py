@@ -119,7 +119,7 @@ class ExportDialog(QtWidgets.QDialog):
     def __init__(self, project_data: dict | None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Export Reference")
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(650)
 
         self._project_data = project_data or {}
         self._settings = Settings.get()
@@ -216,6 +216,7 @@ class ExportDialog(QtWidgets.QDialog):
         elif self.cb_pack_1img.isChecked():
             pack_type = PackType.ONE_IMAGE
 
+        camera_match = self._project_data.get("camera_match", {})
         self._request = ExportRequest(
             profile_key=profile_key,
             image_format=fmt,
@@ -225,6 +226,10 @@ class ExportDialog(QtWidgets.QDialog):
             transparent=is_transparent,
             output_path=output_path,
             pack_type=pack_type,
+            camera_azimuth=camera_match.get("azimuth", 0.0),
+            camera_elevation=camera_match.get("elevation", 15.0),
+            camera_roll=camera_match.get("roll", 0.0),
+            camera_focal_length=camera_match.get("focal_length", 1500.0),
         )
         self.accept()
 

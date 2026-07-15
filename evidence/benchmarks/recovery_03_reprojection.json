@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-07-15T12:21:27.229799",
+  "pipeline": "heuristic baseline \u2192 scipy constrained optimization",
+  "fixtures": {
+    "bus_front": {
+      "fixture": "bus_front",
+      "detected_joints": 17,
+      "heuristic": {
+        "time_s": 0.0,
+        "rme_px": 478.34,
+        "joints": 28
+      },
+      "optimized": {
+        "time_s": 0.1294,
+        "rme_px": 223.19,
+        "joints": 28,
+        "iterations": 14,
+        "success": true
+      },
+      "improvement_pct": 53.3
+    },
+    "zidane_front": {
+      "fixture": "zidane_front",
+      "detected_joints": 10,
+      "heuristic": {
+        "time_s": 0.0,
+        "rme_px": 308.04,
+        "joints": 28
+      },
+      "optimized": {
+        "time_s": 0.1366,
+        "rme_px": 119.02,
+        "joints": 28,
+        "iterations": 16,
+        "success": true
+      },
+      "improvement_pct": 61.4
+    }
+  },
+  "summary": {
+    "fixtures_tested": 2,
+    "fixtures_improved": 2
+  }
+}

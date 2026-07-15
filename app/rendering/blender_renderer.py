@@ -40,6 +40,9 @@ class BlenderRenderer:
         output_path: str,
         config: RenderConfig,
         timeout: int = 300,
+        azimuth: float = 0,
+        elevation: float = 15,
+        distance: float = 2.5,
     ) -> tuple[bool, str]:
         script_path = Path(__file__).parent.parent.parent / "blender" / "scripts" / "render_mannequin.py"
         if not script_path.exists():
@@ -64,9 +67,9 @@ class BlenderRenderer:
             "--transparent", "1" if config.transparent else "0",
             "--jpeg", "1" if is_jpeg else "0",
             "--quality", str(config.jpeg_quality),
-            "--azimuth", "0",
-            "--elevation", "15",
-            "--distance", "2.5",
+            "--azimuth", str(azimuth),
+            "--elevation", str(elevation),
+            "--distance", str(distance),
         ]
 
         try:

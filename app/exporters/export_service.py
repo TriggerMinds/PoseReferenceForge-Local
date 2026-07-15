@@ -128,6 +128,8 @@ class ExportService:
                 pose_json_path=pose_json_path,
                 output_path=str(output_path),
                 config=config,
+                azimuth=request.camera_azimuth,
+                elevation=request.camera_elevation,
             )
             if not success:
                 raise ExportError(f"Render failed: {log}")

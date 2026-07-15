@@ -19,7 +19,7 @@ class OverwritePolicy(Enum):
 @dataclass
 class ExportRequest:
     profile_key: str
-    image_format: str  # "PNG" or "JPEG"
+    image_format: str
     width: int
     height: int
     jpeg_quality: int
@@ -29,3 +29,8 @@ class ExportRequest:
     camera: str = "source_matched"
     overwrite: OverwritePolicy = OverwritePolicy.PROMPT
     background_color: tuple[int, int, int] = (240, 240, 240)
+    camera_azimuth: float = 0.0
+    camera_elevation: float = 15.0
+    camera_roll: float = 0.0
+    camera_distance: float = 2.5
+    camera_focal_length: float = 1500.0

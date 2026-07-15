@@ -5,6 +5,7 @@ from app.config.settings import Settings
 from app.ui.source_panel import SourcePanel
 from app.ui.viewport_3d import Viewport3D
 from app.ui.properties_panel import PropertiesPanel
+from app.ui.camera_match_panel import CameraMatchPanel
 from app.ui.dialogs import NewProjectDialog, SettingsDialog, ExportDialog
 from app.exporters.export_request import OverwritePolicy
 from app.workers.export_worker import ExportWorker
@@ -55,6 +56,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.act_gen3d.setShortcut(QtGui.QKeySequence("Ctrl+G"))
         self.act_gen3d.triggered.connect(self._on_generate_3d)
 
+        self.act_camera = QtGui.QAction("&Camera Match...", self)
+        self.act_camera.setShortcut(QtGui.QKeySequence("Ctrl+M"))
+        self.act_camera.triggered.connect(self._on_camera_match)
+
+        self.act_fit_pose = QtGui.QAction("&Fit 3D Pose", self)
+        self.act_fit_pose.setShortcut(QtGui.QKeySequence("Ctrl+F"))
+        self.act_fit_pose.triggered.connect(self._on_fit_pose)
+
         self.act_export = QtGui.QAction("&Export Reference...", self)
         self.act_export.setShortcut(QtGui.QKeySequence("Ctrl+E"))
         self.act_export.triggered.connect(self._on_export)
@@ -75,6 +84,8 @@ class MainWindow(QtWidgets.QMainWindow):
         process_menu.addAction(self.act_import)
         process_menu.addAction(self.act_detect)
         process_menu.addAction(self.act_gen3d)
+        process_menu.addAction(self.act_fit_pose)
+        process_menu.addAction(self.act_camera)
 
         export_menu = mb.addMenu("&Export")
         export_menu.addAction(self.act_export)
@@ -92,6 +103,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tb.addAction(self.act_import)
         tb.addAction(self.act_detect)
         tb.addAction(self.act_gen3d)
+        tb.addAction(self.act_fit_pose)
+        tb.addAction(self.act_camera)
         tb.addSeparator()
         tb.addAction(self.act_export)
 
@@ -254,6 +267,80 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "3D Generation Error", str(e))
             self.set_status("3D generation failed")
+
+    def _on_camera_match(self):
+        pose3d = self.viewport_3d.get_pose3d()
+        pose2d = self.source_panel.get_pose2d()
+        if pose3d is None:
+            QtWidgets.QMessageBox.warning(self, "No 3D Pose", "Generate a 3D pose first.")
+            return
+
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Camera Match")
+        dialog.resize(1200, 800)
+
+        panel = CameraMatchPanel()
+        img = self.source_panel.image
+        panel.set_data(pose2d, pose3d, img)
+
+        layout = QtWidgets.QVBoxLayout(dialog)
+        layout.addWidget(panel)
+
+        def on_camera_update(params):
+            if self._current_data is not None:
+                self._current_data["camera_match"] = {
+                    "azimuth": params.get("azimuth", 0),
+                    "elevation": params.get("elevation", 15),
+                    "roll": params.get("roll", 0),
+                    "focal_length": params.get("focal_length", 1500),
+                    "scale": params.get("scale", 1.0),
+                }
+
+        panel.camera_changed.connect(on_camera_update)
+
+        def on_close():
+            if self._current_data is not None and "camera_match" not in self._current_data:
+                self._current_data["camera_match"] = {
+                    "azimuth": panel._params.get("azimuth", 0),
+                    "elevation": panel._params.get("elevation", 15),
+                    "roll": panel._params.get("roll", 0),
+                    "focal_length": panel._params.get("focal_length", 1500),
+                    "scale": panel._params.get("scale", 1.0),
+                }
+            dialog.accept()
+
+        btn_close = QtWidgets.QPushButton("Done")
+        btn_close.clicked.connect(on_close)
+        layout.addWidget(btn_close)
+        dialog.exec()
+
+    def _on_fit_pose(self):
+        pose3d = self.viewport_3d.get_pose3d()
+        pose2d = self.source_panel.get_pose2d()
+        if pose3d is None or pose2d is None:
+            QtWidgets.QMessageBox.warning(self, "No Pose", "Generate a 3D pose first.")
+            return
+
+        self.set_status("Fitting 3D pose...")
+        QtWidgets.QApplication.processEvents()
+
+        try:
+            from app.optimization.pose_fitter import ScipyPoseFitter
+            fitter = ScipyPoseFitter()
+            optimized, info = fitter.fit(pose2d, pose3d)
+            self.viewport_3d.set_pose3d(optimized)
+            if self._current_data is not None:
+                from app.persistence.project_repository import ProjectRepository
+                self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
+                self._current_data["fit_info"] = info
+            initial = info.get("initial_error", 0)
+            final = info.get("final_error", 0)
+            self.set_status(
+                f"Pose fitted: reprojection {initial:.1f} → {final:.1f}"
+            )
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Fitting Error", str(e))
+            self.set_status("Fitting failed")
 
     def _on_export(self):
         pose3d = self.viewport_3d.get_pose3d()

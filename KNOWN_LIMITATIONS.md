@@ -20,11 +20,13 @@ Last updated: 2026-07-15 (Recovery 01 audit)
 
 ## 3D Pose
 
-- Monocular 3D lifting uses heuristic depth (not a learned model)
-- All wrist joints get the same Z value, all knee joints get the same Z value, etc.
+- Monocular 3D lifting uses heuristic depth as initializer
+- **ScipyPoseFitter** uses constrained optimization (L-BFGS-B) to refine depth from reprojection (53-61% improvement over heuristic)
+- No learned 3D pose model (MediaPipe world coords unavailable due to API issues in mediapipe 0.10.35)
 - No IK solver for anatomically valid pose refinement
 - No temporal coherence (single-image only)
 - Extreme poses (severe foreshortening, complex sitting) may produce incorrect depth
+- Optimization operates on joint offsets, not skeleton chains (no FK/IK hierarchy)
 
 ## 3D Viewport
 
@@ -53,9 +55,11 @@ Last updated: 2026-07-15 (Recovery 01 audit)
 
 ## Camera
 
-- Camera estimation is implemented but disconnected from all workflows
-- No camera match workspace UI
-- No visual comparison overlay (source image vs mannequin projection)
+- **CameraMatchPanel** now provides interactive camera matching with source overlay
+- Camera parameters (azimuth, elevation, roll, focal length, offset) adjustable via sliders
+- Camera params passed to Blender rendering
+- Camera params saved to project data but not yet fully restored on project reopen
+- No pre-computed camera auto-fit (uses heuristic shoulder-line estimation)
 
 ## Persistence
 

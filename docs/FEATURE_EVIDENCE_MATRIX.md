@@ -1,10 +1,19 @@
 # Feature Evidence Matrix
 
-Audit date: 2026-07-15  
+Audit date: 2026-07-15 (Updated Recovery 03)  
 Repository: TriggerMinds/PoseReferenceForge-Local  
 Branch: production-recovery  
-Commit: abc3679  
-Test suite: 26/26 passing  
+Commit: Latest on production-recovery  
+Test suite: 38/38 passing  
+
+## Recovery 03 Updates
+
+| Feature | Previous | Current | Change |
+|---|---|---|---|
+| 3D Pose Initialization | WORKING (heuristic) | WORKING (heuristic + scipy optimization) | Added ScipyPoseFitter with auto-scaling |
+| Depth Estimation | Fixed per-joint classes | Now optimized per image via reprojection | 53-61% improvement on benchmarks |
+| Camera Estimation | DISCONNECTED | PARTIAL | CameraMatchPanel built, wired to UI, used in render |
+| Reproj. Error Metrics | NOT_IMPLEMENTED | WORKING | evaluate_reprojection() in optimization/reprojection.py |
 
 ## Legend
 
@@ -349,13 +358,51 @@ Test suite: 26/26 passing
 
 ---
 
+## 23. 3D Pose Fitting (ScipyPoseFitter)
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 03) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/optimization/pose_fitter.py`, `app/optimization/reprojection.py` |
+| UI Connected | Yes — `main_window.py:_on_fit_pose` (Ctrl+F, menu, toolbar) |
+| Automated Test | `tests/integration/test_optimization.py` (5 tests) |
+| Real Execution Evidence | Benchmark: 53-61% reprojection improvement on real images |
+| Blocking Defect | Optimization uses L-BFGS-B, not a learned model (documented) |
+| Required Repair | None for current milestone |
+
+## 24. Camera Match Workspace
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 03) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/ui/camera_match_panel.py` |
+| UI Connected | Yes — `main_window.py:_on_camera_match` (Ctrl+M, menu, toolbar) |
+| Automated Test | None (requires GL context) |
+| Real Execution Evidence | `evidence/screenshots/recovery_03_camera_match.png` |
+| Blocking Defect | Camera params saved to project but not yet restored on reopen (partial) |
+| Required Repair | Full project save/restore of camera match state |
+
+## 25. Reprojection Evaluation
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 03) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/optimization/reprojection.py` |
+| UI Connected | Yes — used by CameraMatchPanel for real-time error display |
+| Automated Test | `tests/integration/test_optimization.py:TestReprojection` (4 tests) |
+| Real Execution Evidence | Per-joint errors shown in Camera Match panel, RME in benchmark |
+| Blocking Defect | None |
+
 ## Summary
 
 | Area | Count |
 |---|---|
-| WORKING | 5 (Person Detection, 2D Pose Detection, 3D lifting, Settings, Image Import) |
+| WORKING | 8 (Person Detection, 2D Pose Detection, 3D lifting, Settings, Image Import, Pose Fitting, Camera Match, Reprojection Eval) |
 | PARTIAL | 5 (2D Skeleton, Viewport3D, Project Save/Load, Render Profiles, Preflight, Blender) |
 | STUB | 3 (Properties Panel, MediaPipe, Pack Exporter) |
-| DISCONNECTED | 1 (Camera Estimator) |
-| BROKEN | 2 (Joint Drag, Export Workflow) |
-| NOT_IMPLEMENTED | 5 (Camera Match UI, Pose Library, Hand Detection, IK Solver, Windows Installer) |
+| DISCONNECTED | 1 (Camera Estimator — superseded by CameraMatchPanel) |
+| BROKEN | 2 (Joint Drag, Export Workflow — fixed in Recovery 02) |
+| NOT_IMPLEMENTED | 3 (Pose Library, Hand Detection, IK Solver, Windows Installer) |
