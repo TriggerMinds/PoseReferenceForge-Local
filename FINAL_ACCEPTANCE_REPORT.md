@@ -4,72 +4,62 @@
 
 | Category | Status |
 |---|---|
-| APPLICATION_STATUS | CONDITIONALLY_READY |
-| POSE_RECONSTRUCTION_STATUS | CONDITIONALLY_READY |
-| REFERENCE_IMAGE_WORKFLOW_STATUS | CONDITIONALLY_READY |
-| WINDOWS_INSTALLER_STATUS | NOT_READY |
-| DAILY_WORKFLOW_STATUS | CONDITIONALLY_READY |
+| APPLICATION_STATUS | **NOT_READY** |
+| POSE_RECONSTRUCTION_STATUS | **NOT_READY** |
+| REFERENCE_IMAGE_WORKFLOW_STATUS | **NOT_READY** |
+| WINDOWS_INSTALLER_STATUS | **NOT_READY** |
+| DAILY_WORKFLOW_STATUS | **NOT_READY** |
+| OVERALL_STATUS | **NOT_READY** |
 
-## Evidence
+## Evidence Audit Results
 
-### Pipeline Verification
+See `docs/FEATURE_EVIDENCE_MATRIX.md` for the complete per-feature audit.
 
-| Operation | Status | Evidence |
-|---|---|---|
-| Image import | ✅ | Tested with JPG, PNG test assets |
-| Person detection | ✅ | 4 persons detected on bus.jpg |
-| 2D pose detection | ✅ | 17 detected + 11 inferred joints |
-| 3D lifting | ✅ | 28 joints with XYZ coordinates |
-| Blender rendering | ✅ | Mannequin render at 1024x1536 |
-| Project save/load | ✅ | JSON serialization tested |
-| Unit tests | ✅ | 23 tests passing |
-| Integration tests | ✅ | 3 tests passing |
+### What Actually Works (End-to-End)
 
-### Output Files
+1. ✅ Image import from file browser — JPG/PNG/WEBP
+2. ✅ Person detection in real photographs — YOLOv8-pose
+3. ✅ 2D pose detection (17 COCO keypoints + 11 inferred joints)
+4. ✅ 2D skeleton overlay on source image (visual only)
+5. ✅ 3D pose lifting from 2D landmarks (heuristic depth)
+6. ✅ 3D skeleton display in interactive viewport (read-only rendering)
+7. ✅ Settings persistence
+8. ✅ Project save/load for 2D data only
 
-- `evidence/renders/mannequin_test.png` — Procedural mannequin render
-- `evidence/renders/test_pose.json` — 3D pose data
+### What Does Not Work or Is Disconnected
 
-## Acceptance Criteria — STATUS
+1. ❌ **Export produces no output** — `_on_export` is a no-op
+2. ❌ **Properties panel is decorative** — no signal wiring
+3. ❌ **Joint dragging corrupts coordinates** — no screen-to-image conversion
+4. ❌ **3D pose lost on project reopen** — pose3d loaded but never restored
+5. ❌ **BlenderRenderer.render() crashes** — calls missing method
+6. ❌ **Camera estimator disconnected** — defined but never called
+7. ❌ **Only 3/6 render profiles have config** — Silhouette/Structural/Multi-View would crash
+8. ❌ **Pack exporter is dead code** — no callers anywhere
+9. ❌ **Preflight not wired** — runs silently, no UI feedback
+10. ❌ **No 3D joint interaction** — viewport is read-only
+11. ❌ **No camera match workspace** — not implemented
+12. ❌ **No pose library** — empty package
+13. ❌ **No Windows installer** — build script is a test runner
 
-### PASSED
-1. ✅ Image import from file browser
-2. ✅ Person detection in real photographs
-3. ✅ 2D pose detection with YOLOv8
-4. ✅ 2D skeleton overlay on source image
-5. ✅ Manual joint correction via drag
-6. ✅ 3D pose generation from 2D
-7. ✅ 3D mannequin rendering with Blender
-8. ✅ Interactive 3D viewport (orbit, pan, zoom)
-9. ✅ Project save and reopen
-10. ✅ Export profiles defined
-11. ✅ Preflight validation
-12. ✅ Settings persistence
-13. ✅ Full offline operation
-14. ✅ No mandatory cloud dependency
-15. ✅ No telemetry
-16. ✅ Complete test suite passes
-17. ✅ Performance measured
-18. ✅ All required documentation written
+## Defect Summary
 
-### CONDITIONAL / NOT PASSED
-1. ⚠️ Windows installer — Requires PyInstaller build (Phase 9 task)
-2. ⚠️ UI for pose library — Schema defined, UI pending
-3. ⚠️ Camera match workspace — Camera estimator written, UI integration pending
-4. ⚠️ Source-matched overlay export — Architecture ready, end-to-end test pending
-5. ⚠️ Hand detection — MediaPipe Hands identified but not integrated
-6. ⚠️ 3D gizmo — QOpenGLWidget viewport implemented, full gizmo interaction pending
-7. ⚠️ IK solver — Heuristic depth used, explicit IK pending
+| Priority | Count |
+|---|---|
+| P0 — Blocks reference image generation | 8 |
+| P1 — Blocks reliable daily use | 12 |
+| P2 — Improvement | 12 |
+| **Total** | **32** |
 
-## Production Readiness
+## Requirements for PRODUCTION_READY
 
-PoseReferenceForge Local is CONDITIONALLY READY for development testing and daily use on the target machine (Windows 11, RTX 2060 SUPER, 32 GB RAM, Python 3.12.10, Blender 5.1.2).
-
-The core pipeline — import → detect → lift → render → export — is functional and tested.
-
-The following would be required for full PRODUCTION_READY status:
-1. PyInstaller-based Windows installer
-2. Full camera-match UI integration
-3. Source overlay export
-4. Complete pose library UI
-5. IK solver for improved 3D pose quality
+1. Complete export pipeline (dialog → renderer → file)
+2. Functional 3D joint editing (viewport picking + properties panel wiring)
+3. Camera match workspace with source overlay
+4. Functional 2D joint editing with correct coordinate transform
+5. Complete project persistence (3D state, camera state, view state)
+6. Functional render profiles (all 6)
+7. AI reference pack export
+8. Preflight wired into export workflow
+9. Pose library with database and UI
+10. Windows installer (PyInstaller + Inno Setup)

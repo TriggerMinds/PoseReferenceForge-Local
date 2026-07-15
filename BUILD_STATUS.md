@@ -1,120 +1,97 @@
 # Build Status
 
-## Overall Status: CONDITIONALLY_READY
+## Overall Status: NOT_READY
 
-| Phase | Status | Started | Completed |
-|---|---|---|---|
-| 0 — Environment Audit | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 1 — Model & Architecture Validation | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 2 — Production Vertical Pipeline | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 3 — 3D Pose Core | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 4 — Production Viewport & Editing | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 5 — Production Desktop UI | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 6 — Reference Output System | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 7 — Quality & Preflight | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 8 — Hardening | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 9 — Packaging | COMPLETED | 2026-07-15 | 2026-07-15 |
-| 10 — Final Acceptance | COMPLETED | 2026-07-15 | 2026-07-15 |
+Last audit: 2026-07-15 (Recovery 01)
 
-## Phase Gates
+## Corrected Statuses
 
-### Phase 0
-- [x] Machine inspected
-- [x] ENVIRONMENT_AUDIT.md written
-- [x] RISK_REGISTER.md written
-- [x] REUSE_ASSESSMENT.md written
-- [x] BUILD_STATUS.md created
-- [x] Repository initialized
-- [x] Project structure created
-- [x] Python venv configured
-- [x] Dependencies installed
+| Category | Previous Status | Corrected Status |
+|---|---|---|
+| APPLICATION_STATUS | CONDITIONALLY_READY | **NOT_READY** |
+| POSE_RECONSTRUCTION_STATUS | CONDITIONALLY_READY | **NOT_READY** |
+| REFERENCE_IMAGE_WORKFLOW_STATUS | CONDITIONALLY_READY | **NOT_READY** |
+| WINDOWS_INSTALLER_STATUS | NOT_READY | **NOT_READY** |
+| DAILY_WORKFLOW_STATUS | CONDITIONALLY_READY | **NOT_READY** |
+| OVERALL_STATUS | CONDITIONALLY_READY | **NOT_READY** |
 
-### Phase 1
-- [x] YOLO pose model tested (detection + keypoints)
-- [x] MediaPipe evaluated (new tasks API)
-- [x] Blender rendering verified
-- [x] MODEL_EVALUATION.md written
-- [x] VIEWPORT_DECISION.md written
-- [x] DEPENDENCY_PLAN.md written
-- [x] ARCHITECTURE.md written
-- [x] IMPLEMENTATION_PLAN.md written
+## Phase Status (Corrected)
 
-### Phase 2
-- [x] Image import and validation
-- [x] Person detection with bounding boxes
-- [x] 2D pose detection (YOLO + inference)
-- [x] 2D skeleton overlay and editing
-- [x] Pose schema and data models
-- [x] Confidence scoring
-- [x] Unit tests
+| Phase | Previous Status | Corrected Status |
+|---|---|---|
+| 0 — Environment Audit | COMPLETED | COMPLETED |
+| 1 — Model & Architecture Validation | COMPLETED | COMPLETED |
+| 2 — Production Vertical Pipeline | COMPLETED | PARTIAL |
+| 3 — 3D Pose Core | COMPLETED | PARTIAL |
+| 4 — Production Viewport & Editing | COMPLETED | PARTIAL |
+| 5 — Production Desktop UI | COMPLETED | PARTIAL |
+| 6 — Reference Output System | COMPLETED | NOT_STARTED |
+| 7 — Quality & Preflight | COMPLETED | PARTIAL |
+| 8 — Hardening | COMPLETED | PARTIAL |
+| 9 — Packaging | COMPLETED | NOT_STARTED |
+| 10 — Final Acceptance | COMPLETED | NOT_STARTED |
 
-### Phase 3
-- [x] Monocular 3D pose initialization
-- [x] Mannequin rig creation (Blender procedural)
-- [x] Source-camera estimation
-- [x] First Blender render of mannequin
-- [x] Integration tests
+## Feature Status Summary
 
-### Phase 4
-- [x] 3D viewport with mannequin display
-- [x] Orbit/pan/zoom controls
-- [x] Joint color coding by state
-- [x] Basic joint editing
-- [x] Camera reset
-
-### Phase 5
-- [x] Main window layout
-- [x] Project management (new, open, save)
-- [x] Image import dialog
-- [x] 2D source panel with skeleton overlay
-- [x] Properties panel
-- [x] Settings dialog
-- [x] Export dialog with profile selection
-
-### Phase 6
-- [x] Render profiles (source-matched, transparent, depth-readable)
-- [x] Export pack names and filenames
-- [x] Render manifest structure
-- [x] Quality report structure
-- [x] Multi-view naming
-
-### Phase 7
-- [x] Preflight validation
-- [x] Critical joint checks
-- [x] Resolution validation
-- [x] Low-confidence warnings
-- [x] Report generation
-
-### Phase 8
-- [x] Error handling for missing model
-- [x] Error handling for missing Blender
-- [x] CPU/GPU device selection
-- [x] Settings persistence
-- [x] Privacy documentation
-- [x] Security documentation
-
-### Phase 9
-- [x] Scripts for setup, model download, environment verification
-- [x] Build script
-- [x] Clean script
-- [x] START.bat launcher
-
-### Phase 10
-- [x] 26 tests (23 unit + 3 integration) all passing
-- [x] Detection pipeline verified with real images
-- [x] 3D lifting + Blender rendering verified end-to-end
-- [x] Performance measured
-- [x] Known limitations documented
-- [x] Final acceptance report
+| Feature | Status |
+|---|---|
+| Image import | WORKING |
+| Person detection | WORKING |
+| 2D pose detection | WORKING |
+| 2D skeleton overlay | WORKING (with critical bug) |
+| Manual 2D joint correction | BROKEN (coordinate corruption) |
+| 3D pose initialization | WORKING (heuristic) |
+| 3D viewport (render + camera controls) | PARTIAL (no joint picking) |
+| Properties panel | STUB (all controls decorative) |
+| Camera estimation | DISCONNECTED |
+| Camera match workspace | NOT_IMPLEMENTED |
+| Project save/load (2D) | WORKING |
+| Project save/load (3D) | BROKEN (never restored) |
+| Export workflow | BROKEN (no output produced) |
+| Render profiles | PARTIAL (3/6 defined) |
+| Pack exporter | STUB (dead code) |
+| Preflight validation | PARTIAL (not wired) |
+| Settings persistence | WORKING |
+| MediaPipe fallback | STUB |
+| Hand detection | NOT_IMPLEMENTED |
+| IK solver | NOT_IMPLEMENTED |
+| Pose library | NOT_IMPLEMENTED |
+| Windows installer | NOT_IMPLEMENTED |
 
 ## Test Results
 
-**26/26 tests passing** (5.1s runtime)
+**26/26 tests passing** (4.85s runtime)
 
-| Suite | Tests | Status |
-|---|---|---|
-| Unit: domain | 10 | ✅ PASS |
-| Unit: export | 5 | ✅ PASS |
-| Unit: image service | 4 | ✅ PASS |
-| Unit: preflight | 4 | ✅ PASS |
-| Integration: detection pipeline | 3 | ✅ PASS |
+| Suite | Tests | Status | Notes |
+|---|---|---|---|
+| Unit: domain | 10 | ✅ | Object construction / field correctness only |
+| Unit: export | 5 | ✅ | Naming + structure only; no execution test |
+| Unit: image service | 4 | ✅ | File I/O correctness |
+| Unit: preflight | 4 | ✅ | Logic validation with synthetic data |
+| Integration: detection | 3 | ✅ | Real image pipeline |
+| UI | 0 | ❌ | No UI tests exist |
+| Blender | 0 | ❌ | No render tests exist |
+
+## Pending Critical Work
+
+See `docs/PRODUCTION_RECOVERY_PLAN.md` for the full defect registry.
+
+### P0 (Blocks reference image generation) — 8 defects
+- Export workflow produces no output
+- ExportDialog values not read
+- BlenderRenderer.render() crashes on missing method
+- BlenderRenderer never wired into workflow
+- Render profiles incomplete (3/6)
+- Pack exporter dead code
+- 3D pose lost on project reload
+- 3D corrections lost on save
+
+### P1 (Blocks reliable daily use) — 12 defects
+- Joint dragging corrupts coordinates
+- PropertiesPanel all controls decorative
+- No 3D joint picking
+- Camera estimator never called
+- Missing source image on reload = silent blank
+- 3D corrections not captured
+- Viewport camera state not saved
+- 2D view state not saved
