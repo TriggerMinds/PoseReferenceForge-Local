@@ -6,6 +6,7 @@ from typing import Optional
 
 from app.domain.models import Pose2D, Joint2D, JointState, Pose3D, Joint3D
 from app.config.settings import Settings
+from app.domain.json_sanitizer import sanitize
 
 
 class ProjectRepository:
@@ -16,7 +17,7 @@ class ProjectRepository:
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
         with open(p, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, default=str)
+            json.dump(sanitize(data), f, indent=2)
         return p
 
     def load_project(self, path: str | Path) -> dict:
@@ -28,11 +29,7 @@ class ProjectRepository:
 
     @staticmethod
     def serialize_pose2d(pose: Pose2D) -> dict:
-        def _val(v):
-            if hasattr(v, "value"):
-                return v.value
-            return v
-        return {
+        data = {
             "schema_version": pose.schema_version,
             "image_width": pose.image_width,
             "image_height": pose.image_height,
@@ -44,7 +41,7 @@ class ProjectRepository:
                     "x": j.x, "y": j.y,
                     "confidence": j.confidence,
                     "visibility": j.visibility,
-                    "state": _val(j.state),
+                    "state": j.state.value if hasattr(j.state, "value") else j.state,
                     "detected": j.detected,
                     "inferred": j.inferred,
                     "manually_corrected": j.manually_corrected,
@@ -54,6 +51,7 @@ class ProjectRepository:
                 for jid, j in pose.joints.items()
             },
         }
+        return sanitize(data)
 
     @staticmethod
     def deserialize_pose2d(data: dict) -> Pose2D:
@@ -88,11 +86,7 @@ class ProjectRepository:
     def serialize_pose3d(pose: Optional[Pose3D]) -> dict:
         if pose is None:
             return {}
-        def _val(v):
-            if hasattr(v, "value"):
-                return v.value
-            return v
-        return {
+        data = {
             "schema_version": pose.schema_version,
             "root_x": pose.root_x, "root_y": pose.root_y, "root_z": pose.root_z,
             "joints": {
@@ -100,13 +94,14 @@ class ProjectRepository:
                     "joint_id": j.joint_id,
                     "x": j.x, "y": j.y, "z": j.z,
                     "confidence": j.confidence,
-                    "state": _val(j.state),
+                    "state": j.state.value if hasattr(j.state, "value") else j.state,
                     "locked": j.locked,
                     "manually_corrected": j.manually_corrected,
                 }
                 for jid, j in pose.joints.items()
             },
         }
+        return sanitize(data)
 
     @staticmethod
     def deserialize_pose3d(data: dict) -> Optional[Pose3D]:

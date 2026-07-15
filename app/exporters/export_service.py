@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 
 from app.domain.models import Pose3D, Pose2D
+from app.domain.json_sanitizer import sanitize
 from app.exporters.export_request import ExportRequest, PackType, OverwritePolicy
 from app.exporters.render_profiles import RenderConfig, RenderProfile
 from app.exporters.pack_exporter import create_render_manifest, compute_checksum
@@ -49,8 +50,10 @@ class ExportService:
             base.background_color = request.background_color
         return base
 
-    def run_preflight(self, pose2d, pose3d, request):
-        return run_preflight(pose2d=pose2d, pose3d=pose3d, resolution=(request.width, request.height), profile=request.profile_key)
+    def run_preflight(self, pose2d, pose3d, request, pipeline=None):
+        return run_preflight(pose2d=pose2d, pose3d=pose3d,
+            resolution=(request.width, request.height),
+            profile=request.profile_key, pipeline=pipeline)
 
     def validate_content(self, path, expect_alpha=False, bg_color=(240, 240, 240)) -> list[str]:
         errors = []
@@ -139,7 +142,8 @@ class ExportService:
                 raise ExportError(f"File exists: {output_path}")
 
         config = self.resolve_profile(request)
-        preflight = self.run_preflight(pose2d, pose3d, request)
+        pipeline = project_data.get("pose_pipeline", {})
+        preflight = self.run_preflight(pose2d, pose3d, request, pipeline=pipeline)
         if not preflight.all_passed:
             critical = [c for c in preflight.checks if not c.passed and c.severity == "critical"]
             if critical:
@@ -224,7 +228,7 @@ class ExportService:
 
             manifest_path = output_path.with_suffix(".manifest.json")
             with open(manifest_path, "w", encoding="utf-8") as f:
-                json.dump(manifest, f, indent=2, default=str)
+                json.dump(sanitize(manifest), f, indent=2)
 
             return {
                 "output_path": str(output_path), "manifest_path": str(manifest_path),

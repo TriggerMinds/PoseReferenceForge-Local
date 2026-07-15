@@ -1,0 +1,5 @@
+{
+  "test_bool": true,
+  "test_float": 1.5,
+  "test_int": 42
+}

@@ -1,0 +1,20 @@
+{
+  "optimizer_converged": true,
+  "quality_passed": false,
+  "fit_succeeded": false,
+  "initial_error": 1067358.08,
+  "final_error": 1040019.36,
+  "reprojection_rme": 437.83,
+  "normalized_rme": 0.3243,
+  "max_bone_deviation": 49.00000000000071,
+  "connected": true,
+  "finite_coords": true,
+  "iterations": 56,
+  "scale_factor": 0.41687564230311946,
+  "quality_failures": [
+    "norm_rme=0.3243 > max=0.25",
+    "bone_deviation=49.00 > 0.6",
+    "bones: ['pelvis->lower_spine', 'lower_spine->upper_spine', 'neck->head', 'neck->left_shoulder', 'neck->right_shoulder']"
+  ],
+  "fallback_used": true
+}

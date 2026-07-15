@@ -1,0 +1,28 @@
+{
+  "bone_lengths": {
+    "pelvis->lower_spine": 14.1478,
+    "lower_spine->upper_spine": 45.0459,
+    "upper_spine->neck": 16.9774,
+    "neck->head": 0.1,
+    "neck->left_shoulder": 21.9771,
+    "neck->right_shoulder": 26.1974,
+    "left_shoulder->left_elbow": 46.8215,
+    "right_shoulder->right_elbow": 48.2015,
+    "left_elbow->left_wrist": 27.1893,
+    "right_elbow->right_wrist": 22.1681,
+    "left_wrist->left_hand": 0.05,
+    "right_wrist->right_hand": 0.05,
+    "pelvis->left_hip": 9.3257,
+    "pelvis->right_hip": 9.3257,
+    "left_hip->left_knee": 44.1598,
+    "right_hip->right_knee": 46.5605,
+    "left_knee->left_ankle": 39.3205,
+    "right_knee->right_ankle": 42.5346,
+    "left_ankle->left_heel": 0.02,
+    "right_ankle->right_heel": 0.02,
+    "left_heel->left_foot": 0.0224,
+    "right_heel->right_foot": 0.0224
+  },
+  "connected": true,
+  "finite": true
+}

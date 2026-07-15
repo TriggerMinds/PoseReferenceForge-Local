@@ -1,0 +1,131 @@
+{
+  "total_reprojection_error": 200947.44396653937,
+  "rme": 448.2716185155373,
+  "high_confidence_joints": 16,
+  "low_confidence_joints": 1,
+  "inferred_joints": 11,
+  "per_joint_errors": [
+    {
+      "joint_id": "right_ankle",
+      "error_2d": 240882.07244625068,
+      "detected": true,
+      "confidence": 0.9754922389984131
+    },
+    {
+      "joint_id": "left_ankle",
+      "error_2d": 177673.16218426486,
+      "detected": true,
+      "confidence": 0.964928388595581
+    },
+    {
+      "joint_id": "right_knee",
+      "error_2d": 152057.7249267402,
+      "detected": true,
+      "confidence": 0.9955316781997681
+    },
+    {
+      "joint_id": "left_knee",
+      "error_2d": 108017.61201753763,
+      "detected": true,
+      "confidence": 0.9921918511390686
+    },
+    {
+      "joint_id": "right_ear",
+      "error_2d": 106010.82571619118,
+      "detected": true,
+      "confidence": 0.8832456469535828
+    },
+    {
+      "joint_id": "right_shoulder",
+      "error_2d": 102371.9988529527,
+      "detected": true,
+      "confidence": 0.9944489002227783
+    },
+    {
+      "joint_id": "right_hip",
+      "error_2d": 101314.6335259519,
+      "detected": true,
+      "confidence": 0.9976317882537842
+    },
+    {
+      "joint_id": "right_eye",
+      "error_2d": 95408.17438333908,
+      "detected": true,
+      "confidence": 0.9724908471107483
+    },
+    {
+      "joint_id": "nose",
+      "error_2d": 90573.14773091325,
+      "detected": true,
+      "confidence": 0.9834303855895996
+    },
+    {
+      "joint_id": "left_eye",
+      "error_2d": 88641.61305000792,
+      "detected": true,
+      "confidence": 0.9026157855987549
+    },
+    {
+      "joint_id": "left_ear",
+      "error_2d": 85544.64712117249,
+      "detected": true,
+      "confidence": 0.4235488176345825
+    },
+    {
+      "joint_id": "right_elbow",
+      "error_2d": 81222.32710795211,
+      "detected": true,
+      "confidence": 0.9837561845779419
+    },
+    {
+      "joint_id": "left_hip",
+      "error_2d": 74942.1297067718,
+      "detected": true,
+      "confidence": 0.9962544441223145
+    },
+    {
+      "joint_id": "left_shoulder",
+      "error_2d": 68569.30996930067,
+      "detected": true,
+      "confidence": 0.9880363941192627
+    },
+    {
+      "joint_id": "right_wrist",
+      "error_2d": 65105.49096680511,
+      "detected": true,
+      "confidence": 0.9680597186088562
+    },
+    {
+      "joint_id": "left_wrist",
+      "error_2d": 62318.23813108638,
+      "detected": true,
+      "confidence": 0.9080585837364197
+    },
+    {
+      "joint_id": "left_elbow",
+      "error_2d": 50172.489438933175,
+      "detected": true,
+      "confidence": 0.9422577619552612
+    }
+  ],
+  "fit_info": {
+    "optimizer_converged": true,
+    "quality_passed": false,
+    "fit_succeeded": false,
+    "initial_error": 1067358.08,
+    "final_error": 1040019.36,
+    "reprojection_rme": 437.83,
+    "normalized_rme": 0.3243,
+    "max_bone_deviation": 49.00000000000071,
+    "connected": true,
+    "finite_coords": true,
+    "iterations": 56,
+    "scale_factor": 0.41687564230311946,
+    "quality_failures": [
+      "norm_rme=0.3243 > max=0.25",
+      "bone_deviation=49.00 > 0.6",
+      "bones: ['pelvis->lower_spine', 'lower_spine->upper_spine', 'neck->head', 'neck->left_shoulder', 'neck->right_shoulder']"
+    ],
+    "fallback_used": true
+  }
+}

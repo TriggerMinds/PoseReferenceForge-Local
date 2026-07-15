@@ -4,19 +4,9 @@ import json
 import shutil
 from pathlib import Path
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-
-class _SafeEncoder(json.JSONEncoder):
-    def default(self, o: Any) -> Any:
-        if hasattr(o, "value"):
-            return o.value
-        if isinstance(o, set):
-            return list(o)
-        try:
-            return bool(o) if isinstance(o, (bool,)) else str(o)
-        except Exception:
-            return str(o)
+from app.domain.json_sanitizer import sanitize
 
 from app.domain.models import Pose3D, Pose2D
 from app.exporters.export_request import ExportRequest, PackType, OverwritePolicy
@@ -209,20 +199,20 @@ class PackOrchestrator:
         pose3d_data = repo.serialize_pose3d(pose3d)
         preset_path = os.path.join(pack_dir, "data", f"{pname}_pose_preset.json")
         with open(preset_path, "w") as f:
-            json.dump(pose3d_data, f, indent=2, cls=_SafeEncoder)
-        paths.append(preset_path)
+            json.dump(sanitize(pose3d_data), f, indent=2)
+            paths.append(preset_path)
 
         # Write keypoints
         if pose2d:
             kp_path = os.path.join(pack_dir, "data", f"{pname}_keypoints_2d.json")
             kp_data = repo.serialize_pose2d(pose2d)
             with open(kp_path, "w") as f:
-                json.dump(kp_data, f, indent=2, cls=_SafeEncoder)
+                json.dump(sanitize(kp_data), f, indent=2)
             paths.append(kp_path)
 
         kp3d_path = os.path.join(pack_dir, "data", f"{pname}_keypoints_3d.json")
         with open(kp3d_path, "w") as f:
-            json.dump(pose3d_data, f, indent=2, cls=_SafeEncoder)
+            json.dump(sanitize(pose3d_data), f, indent=2)
         paths.append(kp3d_path)
 
         # Write manifest
@@ -239,7 +229,7 @@ class PackOrchestrator:
         )
         manifest["pack_contents"] = paths
         with open(manifest_path, "w") as f:
-            json.dump(manifest, f, indent=2, cls=_SafeEncoder)
+            json.dump(sanitize(manifest), f, indent=2)
         paths.append(manifest_path)
 
         # Write README

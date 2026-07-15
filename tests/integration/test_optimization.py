@@ -108,11 +108,11 @@ class TestPoseFitter:
         assert len(optimized.joints) > 0
         assert "initial_error" in info
         assert "final_error" in info
-        assert "success" in info
+        assert "optimizer_converged" in info
+        assert "fit_succeeded" in info
         final_val = float(info["final_error"])
         assert final_val >= 0, f"Negative error: {final_val}"
-        # Check that optimization ran (may not always improve with heuristic)
-        assert info.get("iterations", 0) > 0 or info.get("success", False) is not None
+        assert info.get("iterations", 0) > 0 or info.get("optimizer_converged", False) is not None
 
     def test_fit_returns_valid_joints(self):
         """Verify optimized pose has valid joint positions (not NaN)."""
