@@ -23,6 +23,7 @@ class CameraMatchPanel(QtWidgets.QWidget):
             "azimuth": 0.0, "elevation": 15.0, "roll": 0.0,
             "focal_length": 1500.0, "scale": 1.0,
             "tx": 0.0, "ty": 0.0, "tz": 0.0,
+            "distance": 2.5,
             "source_opacity": 0.5, "projection_opacity": 0.8,
         }
         self._locked = False
@@ -88,7 +89,17 @@ class CameraMatchPanel(QtWidgets.QWidget):
         self._sl_ty = make_slider("ty", "Y Offset", 6, -500, 500, 1)
 
         # Opacity controls
-        ctrl_layout.addWidget(QtWidgets.QLabel("Source Opacity"), 7, 0)
+        # Distance slider
+        ctrl_layout.addWidget(QtWidgets.QLabel("Distance"), 7, 0)
+        self._sl_dist = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self._sl_dist.setRange(10, 100)
+        self._sl_dist.setValue(25)
+        self._sl_dist.valueChanged.connect(lambda v: self._on_slider("distance", v / 10))
+        ctrl_layout.addWidget(self._sl_dist, 7, 1)
+        self._lbl_distance = QtWidgets.QLabel("2.5")
+        ctrl_layout.addWidget(self._lbl_distance, 7, 2)
+
+        ctrl_layout.addWidget(QtWidgets.QLabel("Source Opacity"), 8, 0)
         self._sl_src_op = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self._sl_src_op.setRange(0, 100)
         self._sl_src_op.setValue(50)
@@ -156,6 +167,7 @@ class CameraMatchPanel(QtWidgets.QWidget):
             "azimuth": 0.0, "elevation": 15.0, "roll": 0.0,
             "focal_length": 1500.0, "scale": 1.0,
             "tx": 0.0, "ty": 0.0, "tz": 0.0,
+            "distance": 2.5,
             "source_opacity": 0.5, "projection_opacity": 0.8,
         }
         self._sync_sliders()
@@ -217,6 +229,7 @@ class CameraMatchPanel(QtWidgets.QWidget):
             ("scale", self._sl_scale, 0.01),
             ("tx", self._sl_tx, 1),
             ("ty", self._sl_ty, 1),
+            ("distance", self._sl_dist, 0.1),
         ]
         for param, slider, step in slider_map:
             val = self._params[param]

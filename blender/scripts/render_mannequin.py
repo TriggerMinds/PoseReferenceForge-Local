@@ -232,6 +232,8 @@ def main():
     azimuth = float(args.get("azimuth", "0"))
     elevation = float(args.get("elevation", "15"))
     distance = float(args.get("distance", "2.5"))
+    roll = float(args.get("roll", "0"))
+    focal_arg = float(args.get("focal", "0"))
 
     # Load pose
     joints = {}
@@ -259,7 +261,16 @@ def main():
     # Build scene — ALWAYS procedural, no static mesh
     clear_scene()
     build_mannequin(bl_joints)
-    setup_camera(azimuth, elevation, distance)
+    cam = setup_camera(azimuth, elevation, distance)
+
+    # Apply roll (convert degrees to Blender local Z rotation)
+    if abs(roll) > 0.1:
+        cam.rotation_euler.z += math.radians(roll)
+
+    # Apply focal length if specified (>0 means passed from app)
+    if focal_arg > 0:
+        cam.data.lens = focal_arg
+
     setup_lighting()
     setup_world((bg_r, bg_g, bg_b))
 

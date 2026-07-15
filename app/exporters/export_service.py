@@ -131,6 +131,9 @@ class ExportService:
                 config=config,
                 azimuth=request.camera_azimuth,
                 elevation=request.camera_elevation,
+                distance=request.camera_distance,
+                roll=request.camera_roll,
+                focal_length=request.camera_focal_length,
             )
             if not success:
                 raise ExportError(f"Render failed: {log}")
@@ -158,6 +161,23 @@ class ExportService:
             manifest["format"] = config.format
             manifest["jpeg_quality"] = config.jpeg_quality if config.format == "JPEG" else None
             manifest["alpha"] = config.transparent
+            manifest["camera"] = {
+                "azimuth": request.camera_azimuth,
+                "elevation": request.camera_elevation,
+                "roll": request.camera_roll,
+                "distance": request.camera_distance,
+                "focal_length": request.camera_focal_length,
+            }
+            pipeline = project_data.get("pose_pipeline", {})
+            manifest["pose_pipeline"] = {
+                "initializer": pipeline.get("initializer", ""),
+                "fitter": pipeline.get("fitter", ""),
+                "fit_attempted": pipeline.get("fit_attempted", False),
+                "fit_succeeded": pipeline.get("fit_succeeded", False),
+                "fallback_used": pipeline.get("fallback_used", False),
+                "initial_error": pipeline.get("initial_error", 0),
+                "final_error": pipeline.get("final_error", 0),
+            }
 
             manifest_path = output_path.with_suffix(".manifest.json")
             with open(manifest_path, "w", encoding="utf-8") as f:

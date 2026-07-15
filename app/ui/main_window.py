@@ -311,15 +311,43 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_status("Generating 3D pose...")
         QtWidgets.QApplication.processEvents()
 
+        pipeline = {"initializer": "", "fitter": "", "fit_attempted": False,
+                     "fit_succeeded": False, "fallback_used": False,
+                     "initial_error": 0, "final_error": 0}
+
         try:
             from app.pose3d.lifting_pipeline import lift_to_3d
+            from app.optimization.pose_fitter import ScipyPoseFitter
             pose3d = lift_to_3d(pose2d)
+            pipeline["initializer"] = "lift_to_3d_heuristic"
+
+            # Auto-run fitter
+            pipeline["fit_attempted"] = True
+            try:
+                fitter = ScipyPoseFitter()
+                optimized, info = fitter.fit(pose2d, pose3d)
+                pose3d = optimized
+                pipeline["fitter"] = "ScipyPoseFitter"
+                pipeline["fit_succeeded"] = bool(info.get("success", False))
+                pipeline["initial_error"] = float(info.get("initial_error", 0))
+                pipeline["final_error"] = float(info.get("final_error", 0))
+                pipeline["fallback_used"] = not pipeline["fit_succeeded"]
+            except Exception as fit_err:
+                pipeline["fitter"] = f"ScipyPoseFitter_FAILED_{fit_err}"
+                pipeline["fit_succeeded"] = False
+                pipeline["fallback_used"] = True
+                QtWidgets.QMessageBox.warning(self, "Fitting Warning",
+                    f"3D fitting failed: {fit_err}\n\nUsing heuristic pose as fallback.")
+
             self.viewport_3d.set_pose3d(pose3d)
             self.properties_panel.set_pose(pose3d)
             if self._current_data is not None:
                 from app.persistence.project_repository import ProjectRepository
                 self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(pose3d)
-            self.set_status(f"3D pose generated ({len(pose3d.joints)} joints)")
+                self._current_data["pose_pipeline"] = pipeline
+
+            fitted = "fitted" if pipeline["fit_succeeded"] else "fallback"
+            self.set_status(f"3D pose generated and {fitted} ({len(pose3d.joints)} joints)")
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "3D Generation Error", str(e))
             self.set_status("3D generation failed")
@@ -342,27 +370,25 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout(dialog)
         layout.addWidget(panel)
 
-        def on_camera_update(params):
+        def _save_camera_params(params_source):
             if self._current_data is not None:
-                self._current_data["camera_match"] = {
-                    "azimuth": params.get("azimuth", 0),
-                    "elevation": params.get("elevation", 15),
-                    "roll": params.get("roll", 0),
-                    "focal_length": params.get("focal_length", 1500),
-                    "scale": params.get("scale", 1.0),
+                p = {
+                    "azimuth": params_source.get("azimuth", 0),
+                    "elevation": params_source.get("elevation", 15),
+                    "roll": params_source.get("roll", 0),
+                    "focal_length": params_source.get("focal_length", 1500),
+                    "distance": params_source.get("distance", 2.5),
+                    "tx": params_source.get("tx", 0),
+                    "ty": params_source.get("ty", 0),
+                    "scale": params_source.get("scale", 1.0),
                 }
+                self._current_data["camera_match"] = p
 
-        panel.camera_changed.connect(on_camera_update)
+        def on_camera_update(params):
+            _save_camera_params(params)
 
         def on_close():
-            if self._current_data is not None and "camera_match" not in self._current_data:
-                self._current_data["camera_match"] = {
-                    "azimuth": panel._params.get("azimuth", 0),
-                    "elevation": panel._params.get("elevation", 15),
-                    "roll": panel._params.get("roll", 0),
-                    "focal_length": panel._params.get("focal_length", 1500),
-                    "scale": panel._params.get("scale", 1.0),
-                }
+            _save_camera_params(panel._params)
             dialog.accept()
 
         btn_close = QtWidgets.QPushButton("Done")
@@ -377,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "No Pose", "Generate a 3D pose first.")
             return
 
-        self.set_status("Fitting 3D pose...")
+        self.set_status("Refitting 3D pose...")
         QtWidgets.QApplication.processEvents()
 
         try:
@@ -389,22 +415,104 @@ class MainWindow(QtWidgets.QMainWindow):
             if self._current_data is not None:
                 from app.persistence.project_repository import ProjectRepository
                 self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
-                self._current_data["fit_info"] = info
+                self._current_data["pose_pipeline"] = {
+                    "initializer": "lift_to_3d_heuristic",
+                    "fitter": "ScipyPoseFitter",
+                    "fit_attempted": True,
+                    "fit_succeeded": bool(info.get("success", False)),
+                    "fallback_used": False,
+                    "initial_error": float(info.get("initial_error", 0)),
+                    "final_error": float(info.get("final_error", 0)),
+                }
             initial = info.get("initial_error", 0)
             final = info.get("final_error", 0)
             self.set_status(
-                f"Pose fitted: reprojection {initial:.1f} → {final:.1f}"
+                f"Pose refitted: reprojection {initial:.1f} → {final:.1f} ({len(optimized.joints)} joints)"
             )
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Fitting Error", str(e))
             self.set_status("Fitting failed")
 
+    def _get_pipeline_status(self) -> dict:
+        pipe = (self._current_data or {}).get("pose_pipeline", {})
+        return {
+            "has_pose2d": self.source_panel.get_pose2d() is not None,
+            "has_pose3d": self.viewport_3d.get_pose3d() is not None,
+            "fit_attempted": pipe.get("fit_attempted", False),
+            "fit_succeeded": pipe.get("fit_succeeded", False),
+            "fallback_used": pipe.get("fallback_used", False),
+            "camera_matched": "camera_match" in (self._current_data or {}),
+        }
+
+    def _check_export_readiness(self, status: dict) -> list[str]:
+        warnings = []
+        if not status["has_pose3d"]:
+            warnings.append("No 3D pose. Run Generate 3D Pose first.")
+            return warnings
+        if not status["fit_attempted"]:
+            warnings.append("3D fitting not performed. Run Generate 3D Pose (auto-fits) or Refit 3D Pose.")
+        elif not status["fit_succeeded"]:
+            warnings.append("3D fitting failed. Export will use emergency heuristic depth (fallback).")
+        if not status["camera_matched"]:
+            warnings.append("Camera not matched. Using default camera angles.")
+        return warnings
+
     def _on_quick_export(self):
-        """Quick Export: single source-matched clean PNG, default settings."""
         pose3d = self.viewport_3d.get_pose3d()
         if pose3d is None:
             QtWidgets.QMessageBox.warning(self, "No 3D Pose", "Generate a 3D pose first.")
             return
+
+        status = self._get_pipeline_status()
+        warnings = self._check_export_readiness(status)
+
+        # Auto-run fitting if not attempted
+        if not status["fit_attempted"] and status["has_pose2d"]:
+            self.set_status("Fitting pose before export...")
+            QtWidgets.QApplication.processEvents()
+            try:
+                from app.optimization.pose_fitter import ScipyPoseFitter
+                fitter = ScipyPoseFitter()
+                pose2d = self.source_panel.get_pose2d()
+                optimized, info = fitter.fit(pose2d, pose3d)
+                self.viewport_3d.set_pose3d(optimized)
+                self.properties_panel.set_pose(optimized)
+                pose3d = optimized
+                if self._current_data is not None:
+                    from app.persistence.project_repository import ProjectRepository
+                    self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
+                    self._current_data["pose_pipeline"] = {
+                        "initializer": "auto_fit_before_export",
+                        "fitter": "ScipyPoseFitter",
+                        "fit_attempted": True,
+                        "fit_succeeded": bool(info.get("success", False)),
+                        "fallback_used": not bool(info.get("success", False)),
+                        "initial_error": float(info.get("initial_error", 0)),
+                        "final_error": float(info.get("final_error", 0)),
+                    }
+                warnings = self._check_export_readiness(self._get_pipeline_status())
+            except Exception as e:
+                warnings.append(f"Auto-fit failed: {e}")
+
+        # Show fallback warning
+        if status["fallback_used"]:
+            reply = QtWidgets.QMessageBox.warning(self, "Fallback Pose",
+                "3D fitting failed. This export uses the emergency heuristic pose "
+                "and may contain incorrect depth.\n\nExport anyway?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            )
+            if reply != QtWidgets.QMessageBox.Yes:
+                return
+
+        # Show review warnings
+        if warnings:
+            msg = "Review before export:\n\n" + "\n".join(f"• {w}" for w in warnings)
+            reply = QtWidgets.QMessageBox.information(
+                self, "Export Review", msg,
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            )
+            if reply != QtWidgets.QMessageBox.Ok:
+                return
 
         settings = Settings.get()
         export_dir = settings.get_val("export_dir", str(Path.home() / "PoseReferenceForge" / "exports"))
@@ -429,7 +537,6 @@ class MainWindow(QtWidgets.QMainWindow):
         camera = (self._current_data or {}).get("camera_match", {})
         from app.exporters.export_request import ExportRequest, PackType, OverwritePolicy
         from app.workers.export_worker import ExportWorker
-        from app.domain.models import JointState
 
         request = ExportRequest(
             profile_key="source_matched_clean", image_format="PNG",
@@ -438,6 +545,9 @@ class MainWindow(QtWidgets.QMainWindow):
             pack_type=PackType.NONE, overwrite=OverwritePolicy.OVERWRITE,
             camera_azimuth=camera.get("azimuth", 0),
             camera_elevation=camera.get("elevation", 15),
+            camera_roll=camera.get("roll", 0),
+            camera_distance=camera.get("distance", 2.5),
+            camera_focal_length=camera.get("focal_length", 1500),
         )
 
         pose2d = self.source_panel.get_pose2d()

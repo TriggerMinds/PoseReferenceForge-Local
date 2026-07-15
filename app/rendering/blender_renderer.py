@@ -43,6 +43,8 @@ class BlenderRenderer:
         azimuth: float = 0,
         elevation: float = 15,
         distance: float = 2.5,
+        roll: float = 0,
+        focal_length: float = 0,
     ) -> tuple[bool, str]:
         script_path = Path(__file__).parent.parent.parent / "blender" / "scripts" / "render_mannequin.py"
         if not script_path.exists():
@@ -70,6 +72,8 @@ class BlenderRenderer:
             "--azimuth", str(azimuth),
             "--elevation", str(elevation),
             "--distance", str(distance),
+            "--roll", str(roll),
+            "--focal", str(focal_length) if focal_length > 0 else "0",
         ]
 
         try:
