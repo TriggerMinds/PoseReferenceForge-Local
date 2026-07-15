@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pose2D",
+  "type": "object",
+  "properties": {
+    "schema_version": {"type": "string"},
+    "image_width": {"type": "integer"},
+    "image_height": {"type": "integer"},
+    "detector_name": {"type": "string"},
+    "detector_version": {"type": "string"},
+    "joints": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "joint_id": {"type": "string"},
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "confidence": {"type": "number"},
+          "visibility": {"type": "number"},
+          "state": {"type": "string"},
+          "detected": {"type": "boolean"},
+          "inferred": {"type": "boolean"},
+          "manually_corrected": {"type": "boolean"},
+          "locked": {"type": "boolean"},
+          "source_model": {"type": "string"}
+        },
+        "required": ["joint_id", "x", "y"]
+      }
+    }
+  },
+  "required": ["joints", "image_width", "image_height"]
+}
