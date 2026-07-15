@@ -141,24 +141,35 @@ class SourcePanel(QtWidgets.QWidget):
             radius = 5 if joint.detected else 3
             painter.drawEllipse(int(joint.x - radius), int(joint.y - radius), radius * 2, radius * 2)
 
+    def _widget_to_image(self, wx: float, wy: float) -> tuple[float, float]:
+        if self._image is None:
+            return (wx, wy)
+        h, w = self._image.shape[:2]
+        # Widget coordinates → original image coordinates
+        if self._zoom > 0:
+            return (wx / self._zoom, wy / self._zoom)
+        return (wx, wy)
+
     def _on_mouse_press(self, event: QtGui.QMouseEvent):
-        if self._pose2d is None:
+        if self._pose2d is None or self._image is None:
             return
-        # Check if clicking on a joint
+        ix, iy = self._widget_to_image(event.position().x(), event.position().y())
         for jid, joint in self._pose2d.joints.items():
-            dx = event.position().x() - joint.x
-            dy = event.position().y() - joint.y
+            dx = ix - joint.x
+            dy = iy - joint.y
             if (dx * dx + dy * dy) < 100:
                 self._dragging_joint = jid
                 self._drag_offset = QtCore.QPointF(dx, dy)
                 break
 
     def _on_mouse_move(self, event: QtGui.QMouseEvent):
-        if self._dragging_joint and self._pose2d:
+        if self._dragging_joint and self._pose2d and self._image:
+            ix, iy = self._widget_to_image(event.position().x(), event.position().y())
             joint = self._pose2d.joints.get(self._dragging_joint)
             if joint:
-                joint.x = float(event.position().x() - self._drag_offset.x())
-                joint.y = float(event.position().y() - self._drag_offset.y())
+                joint.x = float(ix - self._drag_offset.x())
+                joint.y = float(iy - self._drag_offset.y())
+                joint.state = type(joint.state).MANUALLY_CORRECTED
                 self._render()
 
     def _on_mouse_release(self, event: QtGui.QMouseEvent):

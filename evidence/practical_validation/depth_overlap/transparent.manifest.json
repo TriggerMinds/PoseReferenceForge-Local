@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "transparent",
+  "image_role": "POSE_TRANSPARENT",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": true,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\practical_validation\\depth_overlap\\transparent.png",
+  "output_checksum": "fc6d981db570abc58500d2df1a2db755744a0bcd0867d5b1d87221d015f1752c",
+  "application_timestamp": "2026-07-15T13:15:36.749471",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 672940,
+  "render_timestamp": "2026-07-15T13:15:36.749471",
+  "jpeg_quality": null
+}

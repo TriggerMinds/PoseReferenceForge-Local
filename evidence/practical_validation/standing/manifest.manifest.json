@@ -1,0 +1,12 @@
+{
+  "application_version": "1.0.0-dev",
+  "fixture": "comparison.png",
+  "source_dimensions": [
+    810,
+    1080
+  ],
+  "mannequin_render": "evidence\\practical_validation\\standing\\pose_primary.png",
+  "mannequin_checksum": "ad449154492de7da1e9eae7d55e5d30fa2629c01b607b2f43642db8d62e2d27c",
+  "camera": {},
+  "pose_joints": 28
+}

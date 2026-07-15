@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "source_matched_clean",
+  "image_role": "POSE_PRIMARY",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\practical_validation\\crouching\\pose_primary.png",
+  "output_checksum": "70598ba22c25dbe7b9c744ba5fed013c79dd54d6064f2ac0031ec1c7a2f58fb3",
+  "application_timestamp": "2026-07-15T13:15:41.288965",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 620141,
+  "render_timestamp": "2026-07-15T13:15:41.288965",
+  "jpeg_quality": null
+}

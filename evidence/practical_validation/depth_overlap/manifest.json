@@ -1,0 +1,6 @@
+{
+  "case": "depth_overlap",
+  "source": "zidane.jpg",
+  "detected_joints": 10,
+  "3d_joints": 28
+}

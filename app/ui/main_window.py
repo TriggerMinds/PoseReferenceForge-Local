@@ -72,6 +72,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.act_export.setShortcut(QtGui.QKeySequence("Ctrl+E"))
         self.act_export.triggered.connect(self._on_export)
 
+        self.act_quick_export = QtGui.QAction("&Quick Export Pose Reference", self)
+        self.act_quick_export.setShortcut(QtGui.QKeySequence("Ctrl+Shift+E"))
+        self.act_quick_export.triggered.connect(self._on_quick_export)
+
         self.act_library = QtGui.QAction("&Pose Library...", self)
         self.act_library.setShortcut(QtGui.QKeySequence("Ctrl+L"))
         self.act_library.triggered.connect(self._on_library)
@@ -102,6 +106,9 @@ class MainWindow(QtWidgets.QMainWindow):
         export_menu.addAction(self.act_save_preset)
         export_menu.addAction(self.act_export)
 
+        export_menu.addSeparator()
+        export_menu.addAction(self.act_quick_export)
+
         tools_menu = mb.addMenu("&Tools")
         tools_menu.addAction(self.act_library)
         tools_menu.addAction(self.act_settings)
@@ -120,6 +127,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tb.addAction(self.act_camera)
         tb.addSeparator()
         tb.addAction(self.act_library)
+        tb.addSeparator()
+        tb.addAction(self.act_quick_export)
         tb.addAction(self.act_export)
 
     def _setup_central_widget(self):
@@ -389,6 +398,58 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Fitting Error", str(e))
             self.set_status("Fitting failed")
+
+    def _on_quick_export(self):
+        """Quick Export: single source-matched clean PNG, default settings."""
+        pose3d = self.viewport_3d.get_pose3d()
+        if pose3d is None:
+            QtWidgets.QMessageBox.warning(self, "No 3D Pose", "Generate a 3D pose first.")
+            return
+
+        settings = Settings.get()
+        export_dir = settings.get_val("export_dir", str(Path.home() / "PoseReferenceForge" / "exports"))
+        import datetime
+        default_name = f"pose_reference_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Quick Export Pose Reference",
+            str(Path(export_dir) / default_name),
+            "PNG (*.png);;All Files (*.*)"
+        )
+        if not path:
+            return
+
+        if Path(path).exists():
+            reply = QtWidgets.QMessageBox.question(
+                self, "File Exists", "Overwrite existing file?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            )
+            if reply != QtWidgets.QMessageBox.Yes:
+                return
+
+        camera = (self._current_data or {}).get("camera_match", {})
+        from app.exporters.export_request import ExportRequest, PackType, OverwritePolicy
+        from app.workers.export_worker import ExportWorker
+        from app.domain.models import JointState
+
+        request = ExportRequest(
+            profile_key="source_matched_clean", image_format="PNG",
+            width=1536, height=2048, jpeg_quality=95,
+            transparent=False, output_path=str(path),
+            pack_type=PackType.NONE, overwrite=OverwritePolicy.OVERWRITE,
+            camera_azimuth=camera.get("azimuth", 0),
+            camera_elevation=camera.get("elevation", 15),
+        )
+
+        pose2d = self.source_panel.get_pose2d()
+        self._export_worker = ExportWorker(
+            pose3d=pose3d, pose2d=pose2d, request=request,
+            project_data=self._current_data or {},
+        )
+        self._export_worker.progress.connect(self._on_export_progress)
+        self._export_worker.finished.connect(self._on_export_finished)
+        self._export_worker.error.connect(self._on_export_error)
+        self._export_worker.start()
+        self.set_status("Quick export starting...")
 
     def _on_export(self):
         pose3d = self.viewport_3d.get_pose3d()

@@ -1,0 +1,6 @@
+{
+  "case": "crouching",
+  "source": "bus_crouch.jpg",
+  "detected_joints": 17,
+  "3d_joints": 28
+}

@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "transparent",
+  "image_role": "POSE_TRANSPARENT",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": true,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\practical_validation\\crouching\\transparent.png",
+  "output_checksum": "55c7890344d7ae8a6c570bb1b6cfda93f10b3db49d9c0fdf4ed5018ca39bb38c",
+  "application_timestamp": "2026-07-15T13:15:44.955108",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 672940,
+  "render_timestamp": "2026-07-15T13:15:44.956112",
+  "jpeg_quality": null
+}

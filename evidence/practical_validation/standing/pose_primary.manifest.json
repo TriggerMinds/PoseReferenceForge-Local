@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "source_matched_clean",
+  "image_role": "POSE_PRIMARY",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\practical_validation\\standing\\pose_primary.png",
+  "output_checksum": "8a3f26d55c3420ddf493b18389a33e9ae887f8593555e347c4545840e907dc54",
+  "application_timestamp": "2026-07-15T13:15:24.393487",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 620141,
+  "render_timestamp": "2026-07-15T13:15:24.393487",
+  "jpeg_quality": null
+}
