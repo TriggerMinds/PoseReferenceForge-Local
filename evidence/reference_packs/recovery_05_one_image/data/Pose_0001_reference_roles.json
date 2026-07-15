@@ -1,0 +1,14 @@
+[
+  {
+    "filename": "Pose_0001_pose_primary.png",
+    "role": "POSE_PRIMARY",
+    "camera": "source_matched",
+    "profile": "source_matched_clean",
+    "dimensions": [
+      1536,
+      2048
+    ],
+    "checksum": "023f6ed520bdf7e0f1c20fbf124136d2b4075f807c0056a47be3da8fa4389900",
+    "priority": 1
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Recovery05",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "depth_readable",
+  "image_role": "POSE_DEPTH_SUPPORT",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\reference_packs\\recovery_05_three_image\\support\\Pose_0001_depth_support.png",
+  "output_checksum": "5a17c830d67f217e205ad552f3c4d11ff62b2a199cbe2150a61a7979496889fd",
+  "application_timestamp": "2026-07-15T12:38:53.265356",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 620147,
+  "render_timestamp": "2026-07-15T12:38:53.265356",
+  "jpeg_quality": null
+}

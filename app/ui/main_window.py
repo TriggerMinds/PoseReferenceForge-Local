@@ -7,8 +7,11 @@ from app.ui.viewport_3d import Viewport3D
 from app.ui.properties_panel import PropertiesPanel
 from app.ui.camera_match_panel import CameraMatchPanel
 from app.ui.dialogs import NewProjectDialog, SettingsDialog, ExportDialog
-from app.exporters.export_request import OverwritePolicy
+from app.ui.pose_library_dialog import PoseLibraryDialog
+from app.exporters.export_request import OverwritePolicy, PackType
 from app.workers.export_worker import ExportWorker
+from app.exporters.pack_orchestrator import PackOrchestrator
+from app.rendering.blender_renderer import BlenderRenderer
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -20,6 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self._current_project_path = None
         self._current_data = None
+        self._restored_camera = None
 
         self._setup_actions()
         self._setup_menu_bar()
@@ -68,6 +72,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.act_export.setShortcut(QtGui.QKeySequence("Ctrl+E"))
         self.act_export.triggered.connect(self._on_export)
 
+        self.act_library = QtGui.QAction("&Pose Library...", self)
+        self.act_library.setShortcut(QtGui.QKeySequence("Ctrl+L"))
+        self.act_library.triggered.connect(self._on_library)
+
+        self.act_save_preset = QtGui.QAction("Save Pose &Preset...", self)
+        self.act_save_preset.triggered.connect(self._on_save_preset)
+
         self.act_settings = QtGui.QAction("&Settings...", self)
         self.act_settings.triggered.connect(self._on_settings)
 
@@ -88,9 +99,11 @@ class MainWindow(QtWidgets.QMainWindow):
         process_menu.addAction(self.act_camera)
 
         export_menu = mb.addMenu("&Export")
+        export_menu.addAction(self.act_save_preset)
         export_menu.addAction(self.act_export)
 
         tools_menu = mb.addMenu("&Tools")
+        tools_menu.addAction(self.act_library)
         tools_menu.addAction(self.act_settings)
 
     def _setup_toolbar(self):
@@ -106,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tb.addAction(self.act_fit_pose)
         tb.addAction(self.act_camera)
         tb.addSeparator()
+        tb.addAction(self.act_library)
         tb.addAction(self.act_export)
 
     def _setup_central_widget(self):
@@ -184,6 +198,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 pose2d = repo.deserialize_pose2d(pose2d_data)
                 self.source_panel.set_pose2d(pose2d)
 
+            # Restore 3D pose
+            pose3d_data = self._current_data.get("pose3d", {})
+            if pose3d_data:
+                pose3d = repo.deserialize_pose3d(pose3d_data)
+                self.viewport_3d.set_pose3d(pose3d)
+                self.properties_panel.set_pose(pose3d)
+
             # Restore source image
             src_path = self._current_data.get("source_path", "")
             if src_path and os.path.exists(src_path):
@@ -191,6 +212,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 img, info = ImageService.load_image(src_path)
                 self.source_panel.set_image(img)
                 self._current_data["image_info"] = info
+
+            # Restore camera match
+            camera_match = self._current_data.get("camera_match", {})
+            if camera_match:
+                self._restored_camera = camera_match
+
+            self.set_status(f"Opened: {name} — 2D+3D restored")
 
     def _on_save(self):
         if self._current_project_path:
@@ -376,6 +404,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if request is None:
             return
 
+        # Handle pack exports directly via PackOrchestrator
+        if request.pack_type != PackType.NONE:
+            self._run_pack_export(pose3d, request)
+            return
+
         # Handle overwrite
         output_path = Path(request.output_path)
         if output_path.exists():
@@ -405,6 +438,52 @@ class MainWindow(QtWidgets.QMainWindow):
         self._export_worker.start()
 
         self.set_status("Export starting...")
+
+    def _run_pack_export(self, pose3d, request):
+        from app.library.pose_library import PoseLibrary
+        import datetime
+
+        renderer = BlenderRenderer()
+        if not renderer.is_available():
+            QtWidgets.QMessageBox.critical(self, "Export Error", "Blender not found.")
+            return
+
+        orchestrator = PackOrchestrator(renderer)
+        pose2d = self.source_panel.get_pose2d()
+        project_data = self._current_data or {}
+        camera = project_data.get("camera_match", {})
+
+        base_dir = str(Path(request.output_path).parent)
+        pack_name = f"Pose_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        pack_dir = os.path.join(base_dir, pack_name)
+
+        try:
+            self.set_status("Generating reference pack...")
+            QtWidgets.QApplication.processEvents()
+
+            if request.pack_type == PackType.ONE_IMAGE:
+                paths = orchestrator.export_one_image(
+                    pose3d, pose2d, project_data, pack_dir, 1, camera)
+            elif request.pack_type == PackType.TWO_IMAGE:
+                paths = orchestrator.export_two_image(
+                    pose3d, pose2d, project_data, pack_dir, 1, camera)
+            elif request.pack_type == PackType.THREE_IMAGE:
+                paths = orchestrator.export_three_image(
+                    pose3d, pose2d, project_data, pack_dir, 1, camera)
+            elif request.pack_type == PackType.FULL:
+                paths = orchestrator.export_full(
+                    pose3d, pose2d, project_data, pack_dir, 1, camera)
+            else:
+                return
+
+            self.set_status(f"Pack exported: {pack_dir} ({len(paths)} files)")
+            QtWidgets.QMessageBox.information(
+                self, "Pack Export Complete",
+                f"Reference pack saved to:\n{pack_dir}\n\n{len(paths)} files generated.",
+            )
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Pack Export Error", str(e))
+            self.set_status("Pack export failed")
 
     def _on_export_progress(self, msg: str):
         self.set_status(msg)
@@ -437,6 +516,33 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_export_error(self, msg: str):
         self.set_status(f"Export failed: {msg}")
         QtWidgets.QMessageBox.critical(self, "Export Error", msg)
+
+    def _on_library(self):
+        pose3d = self.viewport_3d.get_pose3d()
+        dialog = PoseLibraryDialog(self)
+        dialog.pose_selected.connect(self._on_library_pose_selected)
+        dialog.exec()
+
+    def _on_library_pose_selected(self, pose_id: str, pose3d: Pose3D):
+        self.viewport_3d.set_pose3d(pose3d)
+        self.properties_panel.set_pose(pose3d)
+        if self._current_data is not None:
+            from app.persistence.project_repository import ProjectRepository
+            self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(pose3d)
+        self.set_status(f"Loaded pose from library: {pose_id[:8]}...")
+
+    def _on_save_preset(self):
+        pose3d = self.viewport_3d.get_pose3d()
+        if pose3d is None:
+            QtWidgets.QMessageBox.warning(self, "No Pose", "Generate a 3D pose first.")
+            return
+        from app.library.pose_library import PoseLibrary
+        lib = PoseLibrary()
+        name, ok = QtWidgets.QInputDialog.getText(self, "Save Pose Preset", "Preset name:")
+        if not ok or not name.strip():
+            return
+        pose_id = lib.save(name=name.strip(), pose3d=pose3d)
+        self.set_status(f"Preset saved: {name}")
 
     def _on_settings(self):
         dialog = SettingsDialog(self.settings, self)

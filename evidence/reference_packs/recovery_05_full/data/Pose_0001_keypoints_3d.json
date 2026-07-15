@@ -1,0 +1,288 @@
+{
+  "schema_version": "1.0",
+  "root_x": 0.0,
+  "root_y": 0.0,
+  "root_z": 0.0,
+  "joints": {
+    "pelvis": {
+      "joint_id": "pelvis",
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0,
+      "confidence": 0.896628999710083,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "lower_spine": {
+      "joint_id": "lower_spine",
+      "x": -0.11830240944538396,
+      "y": 14.147301936474216,
+      "z": 0.0,
+      "confidence": 0.7113862037658691,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "upper_spine": {
+      "joint_id": "upper_spine",
+      "x": 8.723348632295338,
+      "y": 28.74536216206533,
+      "z": -41.68756423031195,
+      "confidence": 0.7113862037658691,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "neck": {
+      "joint_id": "neck",
+      "x": 8.581385740960892,
+      "y": 45.72212448583436,
+      "z": -41.68756423031195,
+      "confidence": 0.8892327547073364,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "head": {
+      "joint_id": "head",
+      "x": 13.732984964374978,
+      "y": 68.24414842302471,
+      "z": -41.68756423031195,
+      "confidence": 0.6884012699127197,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_shoulder": {
+      "joint_id": "left_shoulder",
+      "x": -399.5655970551784,
+      "y": -75.4566088700135,
+      "z": -18.488767223519766,
+      "confidence": 0.9880363941192627,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_shoulder": {
+      "joint_id": "right_shoulder",
+      "x": -522.5097774259565,
+      "y": -71.99664041368983,
+      "z": -18.87589292764814,
+      "confidence": 0.9944489002227783,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_elbow": {
+      "joint_id": "left_elbow",
+      "x": -359.9115372067609,
+      "y": 36.3629889736398,
+      "z": 22.89400756494393,
+      "confidence": 0.9422577619552612,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_elbow": {
+      "joint_id": "right_elbow",
+      "x": -487.5175381603208,
+      "y": 54.15808509893236,
+      "z": 23.774175956302265,
+      "confidence": 0.9837561845779419,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_wrist": {
+      "joint_id": "left_wrist",
+      "x": -421.01596337728944,
+      "y": -4.097417878609143,
+      "z": 43.51837288577804,
+      "confidence": 0.9080585837364197,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_wrist": {
+      "joint_id": "right_wrist",
+      "x": -434.47219346343564,
+      "y": 43.0128960411825,
+      "z": 43.57102500492831,
+      "confidence": 0.9680597186088562,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_hip": {
+      "joint_id": "left_hip",
+      "x": -415.20414705007875,
+      "y": 168.853310879261,
+      "z": 2.5502915680314335,
+      "confidence": 0.9962544441223145,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_hip": {
+      "joint_id": "right_hip",
+      "x": -511.534100988188,
+      "y": 171.34543272504027,
+      "z": 0.896863813396652,
+      "confidence": 0.9976317882537842,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_knee": {
+      "joint_id": "left_knee",
+      "x": -375.16690191977506,
+      "y": 354.8553127760043,
+      "z": 22.003452806745464,
+      "confidence": 0.9921918511390686,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_knee": {
+      "joint_id": "right_knee",
+      "x": -529.3047398573536,
+      "y": 368.69323019417374,
+      "z": 20.956828499433815,
+      "confidence": 0.9955316781997681,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_ankle": {
+      "joint_id": "left_ankle",
+      "x": -364.7918990236968,
+      "y": 528.0264071680066,
+      "z": 31.828289175362517,
+      "confidence": 0.964928388595581,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_ankle": {
+      "joint_id": "right_ankle",
+      "x": -561.1774545024938,
+      "y": 551.9927009248257,
+      "z": 27.9505318318894,
+      "confidence": 0.9754922389984131,
+      "state": "MANUALLY_CORRECTED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "nose": {
+      "joint_id": "nose",
+      "x": 13.732984964374978,
+      "y": 60.73680711062793,
+      "z": -41.68756423031195,
+      "confidence": 0.9834303855895996,
+      "state": "DETECTED_HIGH_CONFIDENCE",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_eye": {
+      "joint_id": "left_eye",
+      "x": 7.035593334344356,
+      "y": 66.52747692610544,
+      "z": 0.0,
+      "confidence": 0.9026157855987549,
+      "state": "DETECTED_HIGH_CONFIDENCE",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_eye": {
+      "joint_id": "right_eye",
+      "x": 2.0934999400471237,
+      "y": 66.67742220724439,
+      "z": 0.0,
+      "confidence": 0.9724908471107483,
+      "state": "DETECTED_HIGH_CONFIDENCE",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_ear": {
+      "joint_id": "left_ear",
+      "x": 7.978486564409158,
+      "y": 64.74367288992035,
+      "z": 0.0,
+      "confidence": 0.4235488176345825,
+      "state": "DETECTED_LOW_CONFIDENCE",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_ear": {
+      "joint_id": "right_ear",
+      "x": -6.398441232027751,
+      "y": 65.29380273905876,
+      "z": 0.0,
+      "confidence": 0.8832456469535828,
+      "state": "DETECTED_HIGH_CONFIDENCE",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_hand": {
+      "joint_id": "left_hand",
+      "x": 1.7490680215725571,
+      "y": 33.65417241581451,
+      "z": 41.68756423031195,
+      "confidence": 0.7264468669891357,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_hand": {
+      "joint_id": "right_hand",
+      "x": -1.0502439895656488,
+      "y": 23.85051728662482,
+      "z": 41.68756423031195,
+      "confidence": 0.774447774887085,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_heel": {
+      "joint_id": "left_heel",
+      "x": 12.690961951851678,
+      "y": -79.13482197782334,
+      "z": 33.350051384249554,
+      "confidence": 0.5789570331573486,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "left_foot": {
+      "joint_id": "left_foot",
+      "x": 17.90190748064067,
+      "y": -80.87180382075302,
+      "z": 33.350051384249554,
+      "confidence": 0.5789570331573486,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_heel": {
+      "joint_id": "right_heel",
+      "x": -24.379868548187527,
+      "y": -84.26004219422263,
+      "z": 33.350051384249554,
+      "confidence": 0.5852953433990479,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    },
+    "right_foot": {
+      "joint_id": "right_foot",
+      "x": -29.59081407697652,
+      "y": -85.99702403715231,
+      "z": 33.350051384249554,
+      "confidence": 0.5852953433990479,
+      "state": "INFERRED",
+      "locked": false,
+      "manually_corrected": false
+    }
+  }
+}

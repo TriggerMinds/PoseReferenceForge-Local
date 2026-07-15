@@ -1,0 +1,27 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Recovery05",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "source_matched_clean",
+  "image_role": "POSE_PRIMARY",
+  "resolution": [
+    1024,
+    1536
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\reference_packs\\recovery_05_full\\multiview\\Pose_0001_left.png",
+  "output_checksum": "edfb8c78a73219649b0626c1a3dbed25f51f83eeea13e9961774147c81108aa3",
+  "application_timestamp": "2026-07-15T12:39:13.455468",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 497470,
+  "render_timestamp": "2026-07-15T12:39:13.455468",
+  "jpeg_quality": null
+}

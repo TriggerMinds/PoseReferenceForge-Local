@@ -28,6 +28,10 @@ class ProjectRepository:
 
     @staticmethod
     def serialize_pose2d(pose: Pose2D) -> dict:
+        def _val(v):
+            if hasattr(v, "value"):
+                return v.value
+            return v
         return {
             "schema_version": pose.schema_version,
             "image_width": pose.image_width,
@@ -40,7 +44,7 @@ class ProjectRepository:
                     "x": j.x, "y": j.y,
                     "confidence": j.confidence,
                     "visibility": j.visibility,
-                    "state": j.state.value,
+                    "state": _val(j.state),
                     "detected": j.detected,
                     "inferred": j.inferred,
                     "manually_corrected": j.manually_corrected,
@@ -84,6 +88,10 @@ class ProjectRepository:
     def serialize_pose3d(pose: Optional[Pose3D]) -> dict:
         if pose is None:
             return {}
+        def _val(v):
+            if hasattr(v, "value"):
+                return v.value
+            return v
         return {
             "schema_version": pose.schema_version,
             "root_x": pose.root_x, "root_y": pose.root_y, "root_z": pose.root_z,
@@ -92,7 +100,7 @@ class ProjectRepository:
                     "joint_id": j.joint_id,
                     "x": j.x, "y": j.y, "z": j.z,
                     "confidence": j.confidence,
-                    "state": j.state.value,
+                    "state": _val(j.state),
                     "locked": j.locked,
                     "manually_corrected": j.manually_corrected,
                 }
