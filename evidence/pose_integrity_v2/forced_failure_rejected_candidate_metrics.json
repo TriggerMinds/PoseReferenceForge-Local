@@ -1,0 +1,1 @@
+{"fit_succeeded": false, "quality_passed": false, "fallback_used": true, "normalized_rme": 0.53, "quality_failures": ["norm_rme=0.53 > 0.25", "skeleton unstable"], "iterations": 0}

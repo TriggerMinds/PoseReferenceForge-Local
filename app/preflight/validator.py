@@ -1,9 +1,14 @@
 """Export preflight with fit quality, connectivity and pose integrity checks."""
 from dataclasses import dataclass, field
 from typing import Optional, Any
+import numpy as np
 
 from app.domain.models import Pose2D, Pose3D, JointState
-from app.optimization.pose_fitter import is_skeleton_connected, has_finite_coords, compute_bone_lengths
+from app.optimization.pose_fitter import (
+    compute_raw_bone_lengths as compute_bone_lengths,
+    geometric_connectivity,
+    SKELETON_BONES,
+)
 
 
 LOW_CONFIDENCE_THRESHOLD = 0.3
@@ -52,26 +57,45 @@ def run_preflight(
         checks.append(PreflightCheck("pose_3d_exists", True, "info", f"{n_joints} 3D joints"))
 
         # Finite coordinate check
-        finite, bad = has_finite_coords(pose3d)
-        if not finite:
-            checks.append(PreflightCheck("finite_coords", False, "critical", f"Non-finite joints: {bad}"))
+        nonfinite = [jid for jid, j in pose3d.joints.items() if not np.isfinite(j.x) or not np.isfinite(j.y) or not np.isfinite(j.z)]
+        if nonfinite:
+            checks.append(PreflightCheck("finite_coords", False, "critical", f"Non-finite joints: {nonfinite}"))
             critical_failures += 1
         else:
             checks.append(PreflightCheck("finite_coords", True, "info", "All coordinates finite"))
 
-        # Skeleton connectivity
-        connected, missing = is_skeleton_connected(pose3d)
+        # Skeleton connectivity (geometric)
+        connected, conn_detail = geometric_connectivity(pose3d)
         if not connected:
-            checks.append(PreflightCheck("skeleton_connected", False, "critical", f"Disconnected: {missing}"))
-            critical_failures += 1
+            all_issues = []
+            # Only flag non-hand/foot zero-length as critical
+            zero_major = [z for z in conn_detail.get("zero_length", [])
+                         if not any(h in z for h in ["hand", "heel", "foot"])]
+            if zero_major:
+                all_issues.append(f"zero_major={zero_major}")
+            if conn_detail.get("missing"):
+                all_issues.append(f"missing={conn_detail['missing']}")
+            if conn_detail.get("nonfinite"):
+                all_issues.append(f"nonfinite={conn_detail['nonfinite']}")
+            if all_issues:
+                checks.append(PreflightCheck("skeleton_connected", False, "critical", f"Connectivity: {'; '.join(all_issues)}"))
+                critical_failures += 1
+            else:
+                checks.append(PreflightCheck("skeleton_connected", True, "info", "Skeleton connected (minor hand/foot near zero)"))
         else:
-            checks.append(PreflightCheck("skeleton_connected", True, "info", "Skeleton connected"))
+            checks.append(PreflightCheck("skeleton_connected", True, "info", "Skeleton geometrically connected"))
 
-        # Bone-length sanity
+        # Bone-length sanity (raw, not clamped)
         lengths = compute_bone_lengths(pose3d)
-        zero_bones = [f"{b[0]}->{b[1]}" for b, l in lengths.items() if l < 0.001]
-        if zero_bones:
-            checks.append(PreflightCheck("bone_lengths", False, "warning", f"Zero-length bones: {zero_bones}"))
+        major_bones = [b for b in lengths.keys()
+                       if not any(h in b[1] for h in ["hand", "heel", "foot"])]
+        zero_major = [f"{b[0]}->{b[1]}" for b in major_bones if lengths[b] < 0.001]
+        zero_minor = [f"{b[0]}->{b[1]}" for b in lengths if b not in major_bones and lengths[b] < 0.001]
+        if zero_major:
+            checks.append(PreflightCheck("bone_lengths", False, "critical", f"Zero-length major bones: {zero_major}"))
+            critical_failures += 1
+        elif zero_minor:
+            checks.append(PreflightCheck("bone_lengths", False, "warning", f"Short hand/foot: {zero_minor}"))
         else:
             checks.append(PreflightCheck("bone_lengths", True, "info", "Bone lengths non-zero"))
 

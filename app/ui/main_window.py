@@ -349,15 +349,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 fitter = ScipyPoseFitter()
                 optimized, info = fitter.fit(pose2d, pose3d)
                 pose3d = optimized
-                pipeline["fitter"] = "ScipyPoseFitter"
-                pipeline["fit_succeeded"] = bool(info.get("success", False))
+                pipeline["fitter"] = info.get("fitter", "ScipyPoseFitter")
+                pipeline["fit_succeeded"] = bool(info.get("fit_succeeded", False))
+                pipeline["fallback_used"] = bool(info.get("fallback_used", not pipeline["fit_succeeded"]))
                 pipeline["initial_error"] = float(info.get("initial_error", 0))
                 pipeline["final_error"] = float(info.get("final_error", 0))
-                pipeline["fallback_used"] = not pipeline["fit_succeeded"]
+                pipeline["optimizer_converged"] = bool(info.get("optimizer_converged", False))
+                pipeline["quality_passed"] = bool(info.get("quality_passed", False))
+                pipeline["quality_failures"] = info.get("quality_failures", [])
+                pipeline["normalized_rme"] = float(info.get("normalized_rme", 0))
             except Exception as fit_err:
                 pipeline["fitter"] = f"ScipyPoseFitter_FAILED_{fit_err}"
                 pipeline["fit_succeeded"] = False
                 pipeline["fallback_used"] = True
+                pipeline["quality_failures"] = [f"Fitter exception: {fit_err}"]
                 QtWidgets.QMessageBox.warning(self, "Fitting Warning",
                     f"3D fitting failed: {fit_err}\n\nUsing heuristic pose as fallback.")
 
@@ -437,19 +442,25 @@ class MainWindow(QtWidgets.QMainWindow):
             if self._current_data is not None:
                 from app.persistence.project_repository import ProjectRepository
                 self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
+                fit_succeeded = bool(info.get("fit_succeeded", False))
                 self._current_data["pose_pipeline"] = {
                     "initializer": "lift_to_3d_heuristic",
-                    "fitter": "ScipyPoseFitter",
+                    "fitter": info.get("fitter", "ScipyPoseFitter"),
                     "fit_attempted": True,
-                    "fit_succeeded": bool(info.get("success", False)),
-                    "fallback_used": False,
+                    "fit_succeeded": fit_succeeded,
+                    "fallback_used": not fit_succeeded,
                     "initial_error": float(info.get("initial_error", 0)),
                     "final_error": float(info.get("final_error", 0)),
+                    "optimizer_converged": bool(info.get("optimizer_converged", False)),
+                    "quality_passed": bool(info.get("quality_passed", False)),
+                    "quality_failures": info.get("quality_failures", []),
+                    "normalized_rme": float(info.get("normalized_rme", 0)),
                 }
             initial = info.get("initial_error", 0)
             final = info.get("final_error", 0)
+            status_str = "fitted" if info.get("fit_succeeded") else "fallback"
             self.set_status(
-                f"Pose refitted: reprojection {initial:.1f} → {final:.1f} ({len(optimized.joints)} joints)"
+                f"Pose refitted ({status_str}): reprojection {initial:.1f} → {final:.1f} ({len(optimized.joints)} joints)"
             )
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Fitting Error", str(e))
@@ -503,14 +514,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self._current_data is not None:
                     from app.persistence.project_repository import ProjectRepository
                     self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
+                    _fit_succeeded = bool(info.get("fit_succeeded", False))
                     self._current_data["pose_pipeline"] = {
                         "initializer": "auto_fit_before_export",
-                        "fitter": "ScipyPoseFitter",
+                        "fitter": info.get("fitter", "ScipyPoseFitter"),
                         "fit_attempted": True,
-                        "fit_succeeded": bool(info.get("success", False)),
-                        "fallback_used": not bool(info.get("success", False)),
+                        "fit_succeeded": _fit_succeeded,
+                        "fallback_used": not _fit_succeeded,
                         "initial_error": float(info.get("initial_error", 0)),
                         "final_error": float(info.get("final_error", 0)),
+                        "optimizer_converged": bool(info.get("optimizer_converged", False)),
+                        "quality_passed": bool(info.get("quality_passed", False)),
+                        "quality_failures": info.get("quality_failures", []),
+                        "normalized_rme": float(info.get("normalized_rme", 0)),
                     }
                 warnings = self._check_export_readiness(self._get_pipeline_status())
             except Exception as e:

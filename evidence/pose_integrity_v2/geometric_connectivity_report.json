@@ -1,0 +1,33 @@
+{
+  "connected": true,
+  "detail": {
+    "missing": [],
+    "zero_length": [],
+    "excessive": [],
+    "nonfinite": []
+  },
+  "bone_lengths": {
+    "pelvis->lower_spine": 22.1929,
+    "lower_spine->upper_spine": 127.4721,
+    "upper_spine->neck": 27.8388,
+    "neck->head": 32.3757,
+    "neck->left_shoulder": 39.2389,
+    "neck->right_shoulder": 33.9427,
+    "left_shoulder->left_elbow": 88.6196,
+    "right_shoulder->right_elbow": 21.5293,
+    "left_elbow->left_wrist": 32.592,
+    "right_elbow->right_wrist": 27.3694,
+    "left_wrist->left_hand": 0.5034,
+    "right_wrist->right_hand": 0.0583,
+    "pelvis->left_hip": 11.1268,
+    "pelvis->right_hip": 13.497,
+    "left_hip->left_knee": 45.5625,
+    "right_hip->right_knee": 125.6661,
+    "left_knee->left_ankle": 43.4138,
+    "right_knee->right_ankle": 85.7192,
+    "left_ankle->left_heel": 5.4427,
+    "right_ankle->right_heel": 5.4427,
+    "left_heel->left_foot": 7.6972,
+    "right_heel->right_foot": 7.6972
+  }
+}

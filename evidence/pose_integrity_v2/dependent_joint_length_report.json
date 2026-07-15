@@ -1,0 +1,9 @@
+{
+  "neck->head": 32.3757,
+  "left_wrist->left_hand": 0.5034,
+  "right_wrist->right_hand": 0.0583,
+  "left_ankle->left_heel": 5.4427,
+  "right_ankle->right_heel": 5.4427,
+  "left_ankle->left_foot": 8.7762,
+  "right_ankle->right_foot": 8.7762
+}

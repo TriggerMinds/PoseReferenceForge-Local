@@ -1,0 +1,53 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "source_matched_clean",
+  "image_role": "POSE_PRIMARY",
+  "resolution": [
+    1024,
+    1536
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\pose_integrity_v2\\asymmetric_depth_render.png",
+  "output_checksum": "cf6600b976fa34dbf8b3317aca1c4512dc23f1f4581a21136b9507e964512832",
+  "application_timestamp": "2026-07-15T15:28:42.215385",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 820946,
+  "render_timestamp": "2026-07-15T15:28:42.215385",
+  "jpeg_quality": null,
+  "camera": {
+    "azimuth": 0.0,
+    "elevation": 15.0,
+    "roll": 0.0,
+    "distance": 0.0,
+    "focal_px": 1500.0,
+    "blender_lens_mm": 66.66666666666667,
+    "sensor_width_mm": 36.0,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "source_width": 810,
+    "source_height": 1080
+  },
+  "content_validation": {
+    "passed": true,
+    "checks": []
+  },
+  "pose_pipeline": {
+    "initializer": "",
+    "fitter": "",
+    "fit_attempted": false,
+    "fit_succeeded": false,
+    "fallback_used": false,
+    "initial_error": 0,
+    "final_error": 0
+  }
+}
