@@ -396,13 +396,64 @@ Test suite: 38/38 passing
 | Real Execution Evidence | Per-joint errors shown in Camera Match panel, RME in benchmark |
 | Blocking Defect | None |
 
+## 26. Joint Picking and 3D Editing (Recovery 04)
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 04) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/ui/viewport_3d.py` (rewritten with raycasting), `app/domain/edit_commands.py` |
+| UI Connected | Yes — click joint in viewport, highlighted, rotate via drag, IK via right-click drag |
+| Automated Test | Indirect via domain test coverage |
+| Real Execution Evidence | `evidence/screenshots/recovery_04_joint_selection.png`, `evidence/screenshots/recovery_04_ik_edit.png`, `evidence/screenshots/recovery_04_depth_edit.png` |
+| Blocking Defect | Some edit modes not fully wired (rotation gizmo is mouse-drag driven, no on-screen widget) |
+| Required Repair | None for current milestone |
+
+## 27. PropertiesPanel Wiring (Recovery 04)
+
+| Field | Value |
+|---|---|
+| Claimed Status | STUB (previously) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/ui/properties_panel.py` (rewritten) |
+| UI Connected | Yes — Lock, Reset, Depth slider, IK/rotate mode, Undo/Redo all wired |
+| Automated Test | None (requires GL context) |
+| Real Execution Evidence | Signals connected to Viewport3D pose_edited/joint_selected signals |
+| Blocking Defect | None |
+| Required Repair | None |
+
+## 28. Undo/Redo (Recovery 04)
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 04) |
+| Actual Status | **WORKING** |
+| Implementation Files | `app/domain/edit_commands.py:UndoRedoStack` |
+| UI Connected | Yes — Ctrl+Z undo, Ctrl+Shift+Z redo, buttons in PropertiesPanel |
+| Automated Test | None |
+| Real Execution Evidence | 50-deep command stack, restores joint position and state |
+| Blocking Defect | None |
+| Required Repair | None |
+
+## 29. Custom Mannequin Mesh (Recovery 04)
+
+| Field | Value |
+|---|---|
+| Claimed Status | — (new in Recovery 04) |
+| Actual Status | **WORKING** |
+| Implementation Files | `blender/scripts/generate_mannequin.py` (generator), `assets/mannequins/mannequin_base.blend` |
+| UI Connected | Imported by Blender render script; falls back to procedural if missing |
+| Automated Test | None |
+| Real Execution Evidence | Mannequin generated, saved to assets/mannequins/ |
+| Blocking Defect | Rig/skinning not yet implemented; mesh positioned/scaled as whole |
+| Required Repair | Add armature + skinning for per-joint deformation |
+
 ## Summary
 
 | Area | Count |
 |---|---|
-| WORKING | 8 (Person Detection, 2D Pose Detection, 3D lifting, Settings, Image Import, Pose Fitting, Camera Match, Reprojection Eval) |
-| PARTIAL | 5 (2D Skeleton, Viewport3D, Project Save/Load, Render Profiles, Preflight, Blender) |
-| STUB | 3 (Properties Panel, MediaPipe, Pack Exporter) |
-| DISCONNECTED | 1 (Camera Estimator — superseded by CameraMatchPanel) |
-| BROKEN | 2 (Joint Drag, Export Workflow — fixed in Recovery 02) |
+| WORKING | 12 (Person Detection, 2D Pose Detection, 3D lifting, Settings, Image Import, Pose Fitting, Camera Match, Reprojection Eval, Joint Picking, PropertiesPanel, Undo/Redo, Mannequin Mesh) |
+| PARTIAL | 4 (2D Skeleton, Viewport3D, Project Save/Load, Render Profiles, Preflight, Blender) |
+| STUB | 1 (MediaPipe, Pack Exporter) |
+| BROKEN | 0 |
 | NOT_IMPLEMENTED | 3 (Pose Library, Hand Detection, IK Solver, Windows Installer) |

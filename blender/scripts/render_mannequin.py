@@ -266,7 +266,46 @@ def main():
 
     # Build scene
     clear_scene()
-    build_mannequin(bl_joints)
+
+    # Try to load custom mannequin mesh; fallback to procedural
+    mannequin_blend = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "mannequins", "mannequin_base.blend")
+    mannequin_loaded = False
+    if os.path.exists(mannequin_blend):
+        try:
+            with bpy.data.libraries.load(mannequin_blend) as (data_from, data_to):
+                if data_from.objects:
+                    data_to.objects = data_from.objects[:]
+            for obj in data_to.objects:
+                if obj is not None:
+                    bpy.context.collection.objects.link(obj)
+            mannequin_loaded = len([o for o in bpy.context.scene.objects if o.type == "MESH"]) > 0
+        except Exception as e:
+            print(f"Could not load mannequin blend: {e}")
+
+    if mannequin_loaded:
+        # Position mannequin at pose center
+        for obj in bpy.context.scene.objects:
+            if obj.type == "MESH":
+                # Estimate pose center from joints
+                center = [0.0, 0.0, 0.0]
+                count = 0
+                for jid, pos in bl_joints.items():
+                    center = (center[0] + pos[0], center[1] + pos[1], center[2] + pos[2])
+                    count += 1
+                if count > 0:
+                    center = (center[0]/count, center[1]/count, center[2]/count)
+                obj.location = center
+                # Scale to roughly match pose size
+                if bl_joints:
+                    xs = [p[0] for p in bl_joints.values()]
+                    zs = [p[1] for p in bl_joints.values()]
+                    ys = [p[2] for p in bl_joints.values()]
+                    size = max(max(xs)-min(xs), max(ys)-min(ys), max(zs)-min(zs))
+                    obj.scale = (size * 2, size * 2, size * 2)
+    else:
+        print("Custom mannequin not available, using procedural fallback")
+        build_mannequin(bl_joints)
+
     setup_camera(azimuth, elevation, distance)
     setup_lighting()
     setup_world((bg_r, bg_g, bg_b))

@@ -120,6 +120,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.properties_panel = PropertiesPanel()
         splitter.addWidget(self.properties_panel)
 
+        # Wire viewport signals to properties panel
+        self.properties_panel.set_viewport(self.viewport_3d)
+        self.viewport_3d.joint_selected.connect(self._on_joint_selected)
+        self.viewport_3d.pose_edited.connect(self._on_pose_edited)
+
         splitter.setSizes([500, 700, 350])
         self.setCentralWidget(splitter)
 
@@ -132,6 +137,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_status(self, msg: str):
         self.status_label.setText(msg)
         QtWidgets.QApplication.processEvents()
+
+    def _on_joint_selected(self, joint_id: str):
+        self.properties_panel.set_joint_selection(joint_id)
+        if joint_id:
+            self.set_status(f"Selected: {joint_id}")
+
+    def _on_pose_edited(self):
+        self.properties_panel.update_warnings()
+        if self.viewport_3d.get_pose3d() and self._current_data is not None:
+            from app.persistence.project_repository import ProjectRepository
+            pose3d = self.viewport_3d.get_pose3d()
+            self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(pose3d)
+        self.set_status("Pose edited")
 
     def _on_new_project(self):
         dialog = NewProjectDialog(self)
@@ -260,6 +278,7 @@ class MainWindow(QtWidgets.QMainWindow):
             from app.pose3d.lifting_pipeline import lift_to_3d
             pose3d = lift_to_3d(pose2d)
             self.viewport_3d.set_pose3d(pose3d)
+            self.properties_panel.set_pose(pose3d)
             if self._current_data is not None:
                 from app.persistence.project_repository import ProjectRepository
                 self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(pose3d)
@@ -329,6 +348,7 @@ class MainWindow(QtWidgets.QMainWindow):
             fitter = ScipyPoseFitter()
             optimized, info = fitter.fit(pose2d, pose3d)
             self.viewport_3d.set_pose3d(optimized)
+            self.properties_panel.set_pose(optimized)
             if self._current_data is not None:
                 from app.persistence.project_repository import ProjectRepository
                 self._current_data["pose3d"] = ProjectRepository.serialize_pose3d(optimized)
