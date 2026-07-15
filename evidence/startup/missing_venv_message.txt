@@ -1,0 +1,3 @@
+﻿ERROR: Virtual environment not found.
+Expected: C:\Users\gewoo\New folder (124)\.venv\Scripts\python.exe
+Run scripts\setup_windows.ps1 to create the environment.

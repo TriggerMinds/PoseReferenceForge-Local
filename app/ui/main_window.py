@@ -2,6 +2,7 @@ import os
 from PySide6 import QtWidgets, QtCore, QtGui
 from pathlib import Path
 from app.config.settings import Settings
+from app.domain.models import Pose3D
 from app.ui.source_panel import SourcePanel
 from app.ui.viewport_3d import Viewport3D
 from app.ui.properties_panel import PropertiesPanel
