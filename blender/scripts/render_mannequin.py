@@ -238,6 +238,8 @@ def main():
     bg_g = float(args.get('background_g', '240')) / 255
     bg_b = float(args.get('background_b', '240')) / 255
     transparent = bool(int(args.get('transparent', '0')))
+    jpeg = bool(int(args.get('jpeg', '0')))
+    jpeg_quality = int(args.get('quality', '95'))
     azimuth = float(args.get('azimuth', '0'))
     elevation = float(args.get('elevation', '0'))
     distance = float(args.get('distance', '2.5'))
@@ -273,14 +275,19 @@ def main():
     bpy.context.scene.render.resolution_x = width
     bpy.context.scene.render.resolution_y = height
     bpy.context.scene.render.resolution_percentage = 100
-    bpy.context.scene.render.image_settings.file_format = 'PNG'
 
-    if transparent:
-        bpy.context.scene.render.image_settings.color_mode = 'RGBA'
-        bpy.context.scene.render.film_transparent = True
-    else:
+    if jpeg:
+        bpy.context.scene.render.image_settings.file_format = 'JPEG'
+        bpy.context.scene.render.image_settings.quality = jpeg_quality
         bpy.context.scene.render.image_settings.color_mode = 'RGB'
-        bpy.context.scene.render.film_transparent = False
+    else:
+        bpy.context.scene.render.image_settings.file_format = 'PNG'
+        if transparent:
+            bpy.context.scene.render.image_settings.color_mode = 'RGBA'
+            bpy.context.scene.render.film_transparent = True
+        else:
+            bpy.context.scene.render.image_settings.color_mode = 'RGB'
+            bpy.context.scene.render.film_transparent = False
 
     bpy.context.scene.render.filepath = output_path
 

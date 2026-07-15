@@ -1,9 +1,13 @@
+import os
 from PySide6 import QtWidgets, QtCore, QtGui
+from pathlib import Path
 from app.config.settings import Settings
 from app.ui.source_panel import SourcePanel
 from app.ui.viewport_3d import Viewport3D
 from app.ui.properties_panel import PropertiesPanel
-from app.ui.dialogs import NewProjectDialog, SettingsDialog
+from app.ui.dialogs import NewProjectDialog, SettingsDialog, ExportDialog
+from app.exporters.export_request import OverwritePolicy
+from app.workers.export_worker import ExportWorker
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -252,16 +256,82 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_status("3D generation failed")
 
     def _on_export(self):
-        self.set_status("Exporting reference...")
-        QtWidgets.QApplication.processEvents()
-        from app.ui.dialogs import ExportDialog
+        pose3d = self.viewport_3d.get_pose3d()
+        if pose3d is None:
+            QtWidgets.QMessageBox.warning(self, "No 3D Pose", "Generate a 3D pose first.")
+            return
+
         dialog = ExportDialog(self._current_data, self)
-        dialog.exec()
+        if not dialog.exec():
+            return
+
+        request = dialog.get_request()
+        if request is None:
+            return
+
+        # Handle overwrite
+        output_path = Path(request.output_path)
+        if output_path.exists():
+            reply = QtWidgets.QMessageBox.question(
+                self, "File Exists",
+                f"Overwrite {output_path.name}?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                request.overwrite = OverwritePolicy.NUMBERED
+            elif reply == QtWidgets.QMessageBox.Cancel:
+                return
+            else:
+                request.overwrite = OverwritePolicy.OVERWRITE
+
+        pose2d = self.source_panel.get_pose2d()
+
+        self._export_worker = ExportWorker(
+            pose3d=pose3d,
+            pose2d=pose2d,
+            request=request,
+            project_data=self._current_data or {},
+        )
+        self._export_worker.progress.connect(self._on_export_progress)
+        self._export_worker.finished.connect(self._on_export_finished)
+        self._export_worker.error.connect(self._on_export_error)
+        self._export_worker.start()
+
+        self.set_status("Export starting...")
+
+    def _on_export_progress(self, msg: str):
+        self.set_status(msg)
+
+    def _on_export_finished(self, result: dict):
+        path = result.get("output_path", "?")
+        size_kb = result.get("file_size", 0) / 1024
+        validation = result.get("validation_errors")
+        msg = f"Exported: {path} ({size_kb:.0f} KB)"
+        if validation:
+            msg += f" | Warnings: {'; '.join(validation)}"
+        self.set_status(msg)
+
+        detail_lines = [
+            f"Output: {path}",
+            f"Size: {size_kb:.0f} KB",
+            f"Dimensions: {result.get('width')}x{result.get('height')}",
+            f"Format: {result.get('format')}",
+            f"SHA-256: {result.get('checksum', '')[:16]}...",
+            f"Manifest: {result.get('manifest_path', 'N/A')}",
+        ]
+        if validation:
+            detail_lines.append(f"Validation warnings: {'; '.join(validation)}")
+
+        QtWidgets.QMessageBox.information(
+            self, "Export Complete",
+            "\n".join(detail_lines),
+        )
+
+    def _on_export_error(self, msg: str):
+        self.set_status(f"Export failed: {msg}")
+        QtWidgets.QMessageBox.critical(self, "Export Error", msg)
 
     def _on_settings(self):
         dialog = SettingsDialog(self.settings, self)
         if dialog.exec():
             self.set_status("Settings updated")
-
-
-import os

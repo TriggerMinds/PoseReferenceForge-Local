@@ -22,6 +22,9 @@ class Viewport3D(QtOpenGLWidgets.QOpenGLWidget):
         self._pose3d = pose
         self.update()
 
+    def get_pose3d(self) -> Optional[Pose3D]:
+        return self._pose3d
+
     def initializeGL(self):
         import OpenGL.GL as gl
         gl.glClearColor(0.15, 0.15, 0.15, 1.0)
