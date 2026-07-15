@@ -1,0 +1,44 @@
+[
+  {
+    "a": "front",
+    "b": "left",
+    "mean_diff": 2.78,
+    "max_diff": 65,
+    "pixel_identical": false
+  },
+  {
+    "a": "front",
+    "b": "rear",
+    "mean_diff": 3.23,
+    "max_diff": 62,
+    "pixel_identical": false
+  },
+  {
+    "a": "front",
+    "b": "right",
+    "mean_diff": 2.93,
+    "max_diff": 54,
+    "pixel_identical": false
+  },
+  {
+    "a": "left",
+    "b": "rear",
+    "mean_diff": 1.88,
+    "max_diff": 60,
+    "pixel_identical": false
+  },
+  {
+    "a": "left",
+    "b": "right",
+    "mean_diff": 1.08,
+    "max_diff": 67,
+    "pixel_identical": false
+  },
+  {
+    "a": "rear",
+    "b": "right",
+    "mean_diff": 1.9,
+    "max_diff": 52,
+    "pixel_identical": false
+  }
+]

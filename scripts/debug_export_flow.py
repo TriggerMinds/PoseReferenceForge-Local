@@ -1,4 +1,4 @@
-"""Debug the full export flow."""
+"""Debug the full export flow. Cleans temp files before each test."""
 import sys, os, json, tempfile, cv2
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
@@ -28,8 +28,17 @@ if not renderer.is_available():
 
 service = ExportService(renderer)
 
-# Test 1: Export to temp dir
+# Clean up any old test files
 tmp = tempfile.gettempdir()
+for f in ["prf_test_clean.png", "prf_test_clean.rendering.png"]:
+    p = os.path.join(tmp, f)
+    if os.path.exists(p): os.unlink(p)
+import shutil
+for d in ["prf_newdir_test"]:
+    p = os.path.join(tmp, d)
+    if os.path.exists(p): shutil.rmtree(p)
+
+# Test 1: Export to temp dir
 out1 = os.path.join(tmp, "prf_test_clean.png")
 req1 = ExportRequest(
     profile_key="source_matched_clean", image_format="PNG",

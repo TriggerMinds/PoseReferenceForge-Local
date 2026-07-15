@@ -365,11 +365,11 @@ class TestWorkflowWiring:
         # No roll
         out0 = str(tmp_path / "noroll.png")
         config = RenderConfig(width=256, height=256, format="PNG")
-        renderer.render_from_config(jpath, out0, config, azimuth=0, elevation=15, roll=0)
+        renderer.render_from_config(jpath, out0, config, azimuth=0, elevation=15, roll=0, focal_px=1500, source_w=256)
 
         # With roll
         out45 = str(tmp_path / "roll45.png")
-        renderer.render_from_config(jpath, out45, config, azimuth=0, elevation=15, roll=45)
+        renderer.render_from_config(jpath, out45, config, azimuth=0, elevation=15, roll=45, focal_px=1500, source_w=256)
 
         with open(out0, "rb") as f0, open(out45, "rb") as fb:
             assert f0.read() != fb.read(), "Roll 0 and Roll 45 produce identical renders!"
@@ -399,13 +399,13 @@ class TestWorkflowWiring:
 
         config = RenderConfig(width=256, height=256, format="PNG")
 
-        # Short focal (wide angle)
+        # Short focal (wide angle) - pass as focal_px with source_w for conversion
         out_wide = str(tmp_path / "wide.png")
-        renderer.render_from_config(jpath, out_wide, config, azimuth=0, elevation=15, focal_length=35)
+        renderer.render_from_config(jpath, out_wide, config, azimuth=0, elevation=15, focal_px=35, source_w=256)
 
         # Long focal (telephoto)
         out_tele = str(tmp_path / "tele.png")
-        renderer.render_from_config(jpath, out_tele, config, azimuth=0, elevation=15, focal_length=200)
+        renderer.render_from_config(jpath, out_tele, config, azimuth=0, elevation=15, focal_px=200, source_w=256)
 
         with open(out_wide, "rb") as fw, open(out_tele, "rb") as ft:
             assert fw.read() != ft.read(), "Different focal lengths produce identical renders!"

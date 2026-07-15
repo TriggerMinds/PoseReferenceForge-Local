@@ -25,6 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._current_project_path = None
         self._current_data = None
         self._restored_camera = None
+        self._export_in_progress = False
 
         self._setup_actions()
         self._setup_menu_bar()
@@ -163,6 +164,20 @@ class MainWindow(QtWidgets.QMainWindow):
         from pathlib import Path
         export_dir = self.settings.get_val("export_dir", str(Path.home() / "PoseReferenceForge" / "exports"))
         Path(export_dir).mkdir(parents=True, exist_ok=True)
+
+    def closeEvent(self, event):
+        if self._export_in_progress:
+            QtWidgets.QMessageBox.information(self, "Export Active",
+                "An export is currently in progress.\n"
+                "Please wait for it to complete before closing the application.")
+            event.ignore()
+            return
+        event.accept()
+
+    def _toggle_export_actions(self, enabled: bool):
+        for act in [self.act_export, self.act_quick_export, self.act_save, self.act_detect,
+                     self.act_gen3d, self.act_fit_pose, self.act_camera]:
+            act.setEnabled(enabled)
 
     def set_status(self, msg: str):
         self.status_label.setText(msg)
@@ -543,7 +558,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         camera = (self._current_data or {}).get("camera_match", {})
         from app.exporters.export_request import ExportRequest, PackType, OverwritePolicy
-        # Synchronous export (not async worker) so user cannot close app before completion
+        from app.workers.export_worker import ExportWorker
+
+        img_info = (self._current_data or {}).get("image_info", {})
         request = ExportRequest(
             profile_key="source_matched_clean", image_format="PNG",
             width=1536, height=2048, jpeg_quality=95,
@@ -552,50 +569,26 @@ class MainWindow(QtWidgets.QMainWindow):
             camera_azimuth=camera.get("azimuth", 0),
             camera_elevation=camera.get("elevation", 15),
             camera_roll=camera.get("roll", 0),
-            camera_distance=camera.get("distance", 2.5),
+            camera_distance=camera.get("distance", 0),
             camera_focal_length=camera.get("focal_length", 1500),
+            camera_shift_x=camera.get("tx", 0),
+            camera_shift_y=camera.get("ty", 0),
+            source_width=img_info.get("width", 0),
+            source_height=img_info.get("height", 0),
         )
 
-        self.set_status("Rendering pose reference...")
-        QtWidgets.QApplication.processEvents()
-
-        try:
-            from app.rendering.blender_renderer import BlenderRenderer
-            from app.exporters.export_service import ExportService
-            renderer = BlenderRenderer()
-            if not renderer.is_available():
-                QtWidgets.QMessageBox.critical(self, "Blender Not Found",
-                    "Configure Blender path in Settings → General → Blender Path")
-                self.set_status("Export failed: Blender not found")
-                return
-
-            service = ExportService(renderer)
-            pose2d = self.source_panel.get_pose2d()
-            result = service.export(
-                pose3d=pose3d, pose2d=pose2d, request=request,
-                project_data=self._current_data or {},
-            )
-
-            validation = service.validate_output(
-                result["output_path"], result["width"], result["height"], result["transparent"],
-            )
-
-            path_out = result["output_path"]
-            size_kb = result.get("file_size", 0) / 1024
-            msg = f"Exported: {path_out} ({size_kb:.0f} KB)"
-            if validation:
-                msg += f" | {'; '.join(validation)}"
-            self.set_status(msg)
-
-            QtWidgets.QMessageBox.information(self, "Export Complete",
-                f"Output: {path_out}\nSize: {size_kb:.0f} KB\n"
-                f"Dimensions: {result.get('width')}x{result.get('height')}\n"
-                f"Format: {result.get('format')}\n"
-                f"SHA-256: {result.get('checksum', '')[:16]}..."
-            )
-        except Exception as e:
-            self.set_status(f"Export failed: {e}")
-            QtWidgets.QMessageBox.critical(self, "Export Error", str(e))
+        pose2d = self.source_panel.get_pose2d()
+        self._export_worker = ExportWorker(
+            pose3d=pose3d, pose2d=pose2d, request=request,
+            project_data=self._current_data or {},
+        )
+        self._export_worker.progress.connect(self._on_export_progress)
+        self._export_worker.finished.connect(self._on_export_finished)
+        self._export_worker.error.connect(self._on_export_error)
+        self._export_worker.start()
+        self._export_in_progress = True
+        self._toggle_export_actions(False)
+        self.set_status("Quick export starting...")
 
     def _on_export(self):
         pose3d = self.viewport_3d.get_pose3d()
@@ -632,6 +625,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 request.overwrite = OverwritePolicy.OVERWRITE
 
         pose2d = self.source_panel.get_pose2d()
+
+        img_info = (self._current_data or {}).get("image_info", {})
+        request.source_width = img_info.get("width", 0)
+        request.source_height = img_info.get("height", 0)
 
         self._export_worker = ExportWorker(
             pose3d=pose3d,
@@ -696,6 +693,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_status(msg)
 
     def _on_export_finished(self, result: dict):
+        self._export_in_progress = False
+        self._toggle_export_actions(True)
         path = result.get("output_path", "?")
         size_kb = result.get("file_size", 0) / 1024
         validation = result.get("validation_errors")
@@ -721,6 +720,8 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
     def _on_export_error(self, msg: str):
+        self._export_in_progress = False
+        self._toggle_export_actions(True)
         self.set_status(f"Export failed: {msg}")
         QtWidgets.QMessageBox.critical(self, "Export Error", msg)
 

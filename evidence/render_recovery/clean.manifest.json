@@ -1,0 +1,53 @@
+{
+  "application_version": "1.0.0-dev",
+  "project_name": "Untitled",
+  "source_image_hash": "",
+  "source_image_dimensions": [
+    0,
+    0
+  ],
+  "render_profile": "source_matched_clean",
+  "image_role": "POSE_PRIMARY",
+  "resolution": [
+    1536,
+    2048
+  ],
+  "format": "PNG",
+  "alpha": false,
+  "output_path": "C:\\Users\\gewoo\\New folder (124)\\evidence\\render_recovery\\clean.png",
+  "output_checksum": "f4a50856a1c198901d07be9b05646c3ed9737ceabd0cfa8109cad71d5634b872",
+  "application_timestamp": "2026-07-15T14:47:19.608672",
+  "pose3d_summary": {
+    "joint_count": 28,
+    "locked_joints": []
+  },
+  "file_size_bytes": 1700483,
+  "render_timestamp": "2026-07-15T14:47:19.608672",
+  "jpeg_quality": null,
+  "camera": {
+    "azimuth": 0.0,
+    "elevation": 15.0,
+    "roll": 0.0,
+    "distance": 0.0,
+    "focal_px": 1500.0,
+    "blender_lens_mm": 66.66666666666667,
+    "sensor_width_mm": 36.0,
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "source_width": 810,
+    "source_height": 1080
+  },
+  "content_validation": {
+    "passed": true,
+    "checks": []
+  },
+  "pose_pipeline": {
+    "initializer": "",
+    "fitter": "",
+    "fit_attempted": false,
+    "fit_succeeded": false,
+    "fallback_used": false,
+    "initial_error": 0,
+    "final_error": 0
+  }
+}

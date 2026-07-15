@@ -1,0 +1,7 @@
+{
+  "focal_px": 1500,
+  "source_width": 1536,
+  "sensor_width_mm": 36.0,
+  "blender_lens_mm": 35.15625,
+  "expected_mm": 35.16
+}
